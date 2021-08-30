@@ -85,3 +85,6 @@ __pycache__/
 /db_backup.sqlite3
 
 media/
+
+# API KEY - Todo : 보안문제 해결
+secrets.py
