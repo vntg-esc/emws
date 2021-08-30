@@ -1,11 +1,8 @@
 import base64
-
-# 트위터 API 개발자 키를 아래에 입력
-# client_key = I'qbhQ1AwYrTFEMvxEnIMQcphA'
-# client_secret = k'2zx7wvF610rToWkkwkxDFNNHWuLLhTHDcnDoludDREh74H3jz'
+import secrets
 
 # b64 encoded 형태로 만드는 과정 
-key_secret = '{}:{}'.format(client_key, client_secret).encode('ascii')
+key_secret = '{}:{}'.format(secrets.TWITTER_CONSUMER_KEY, secrets.TWITTER_CONSUMER_SECRET).encode('ascii')
 b64_encoded_key = base64.b64encode(key_secret)
 b64_encoded_key = b64_encoded_key.decode('ascii')
 
