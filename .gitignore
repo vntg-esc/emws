@@ -88,3 +88,4 @@ media/
 
 # API KEY - Todo : 보안문제 해결
 secrets.py
+gspread.json
