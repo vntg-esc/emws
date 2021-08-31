@@ -6,6 +6,9 @@ import secrets
 # 필터 문자열
 import constant
 
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 class twittPostInfo():
     """
     twittInfo Class
@@ -39,6 +42,36 @@ class twittPostInfo():
     def get_retweet_count(self):
         return self._details.get('retweet_count')
 
+def saveData(twittDaysInfo):
+    """구글스프레드시트 저장"""
+    scope = [
+    'https://spreadsheets.google.com/feeds',
+    'https://www.googleapis.com/auth/drive',
+    ]
+
+    json_file_name = 'gspread.json'
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
+    gc = gspread.authorize(credentials)
+
+
+    spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
+
+    # 스프레스시트 문서 가져오기 
+    doc = gc.open_by_url(spreadsheet_url)
+
+    # 시트 선택하기
+    worksheet = doc.worksheet('시트1')
+    
+    # 스프레드시트 작성
+    for postDate, hourData in sorted(twittDaysInfo.items()):
+        # print(postDate, hourData)
+        for hour, campaignData in sorted(hourData.items()):
+            # print(postDate, hour, campaignData)
+            for campaign, postData in campaignData.items():
+                # print(postDate, hour, campaign, list(postData.values())[0], list(postData.values())[1], list(postData.values())[2])
+                worksheet.append_row([str(postDate), str(hour), str(campaign), list(postData.values())[0], list(postData.values())[1], list(postData.values())[2]])
+
 
 def updateTwittDetailInfo(status, user_name, twittUserInfo):
     # Update 상세정보 - 트윗수, 좋아요수
@@ -48,7 +81,7 @@ def updateTwittDetailInfo(status, user_name, twittUserInfo):
     twittDetailInfo['likeCnt'] += status.favorite_count
     twittDetailInfo['retwittCnt'] += status.retweet_count
 
-def createTwittInfo(dateExists, create_at, status, user_name, twittDaysInfo, twittUserInfo):
+def createTwittInfo(dateExists, hourExists, create_at, status, user_name, twittDaysInfo, twittHoursInfo, twittUserInfo):
     # 트윗일자
     create_at_date = create_at.strftime('%Y-%m-%d')
 
@@ -63,19 +96,12 @@ def createTwittInfo(dateExists, create_at, status, user_name, twittDaysInfo, twi
     }
     twittUserInfo[user_name] = twittDetailInfo
 
-    # twittHourlyInfo = {}
+    if hourExists == False:
+        twittHoursInfo[int(create_at.strftime('%H'))] = twittUserInfo
 
-    # # 시간별 자료가 있는지 확인
-    # if create_at.strftime('%H') in twittHourlyInfo:
-    #     twittHourlyInfo = twittHourlyInfo.get(create_at.strftime('%H'))
-    
     if dateExists == False:
-        twittDaysInfo[create_at_date] = twittUserInfo
-
-        # twittHourlyInfo[create_at.strftime('%H')] = twittUserInfo
-        # twittDaysInfo[create_at_date] = twittHourlyInfo
-
-    # return twittDaysInfo
+        # twittDaysInfo[create_at_date] = twittUserInfo
+        twittDaysInfo[create_at_date] = twittHoursInfo
 
 
 def getSearchTwittbyKeyword(twitter_api, keyword):
@@ -117,29 +143,51 @@ def main(keyword):
             # print('존재 : ' + create_at_date)
 
             # 조회된 정보 가져오기 및 누적
-            twittUserInfo = twittDaysInfo.get(create_at_date)
+            twittHoursInfo = twittDaysInfo.get(create_at_date)
 
-            # 필터 문자열
-            for filterStr in constant.C_FILTER_KEYWORD:
-                # 사용자가 필터 문자열에 포함되는지 확인
-                if filterStr in status.user.name:
-                    # 사용자가 이미 저장되었는지 확인
-                    if status.user.screen_name in twittUserInfo:
-                        # 상세정보 - 트윗수, 좋아요수
-                        updateTwittDetailInfo(status, status.user.screen_name, twittUserInfo)
-                        
-                    else:
-                        # 상세정보 - 트윗수, 좋아요수
-                        createTwittInfo(True, create_at, status, status.user.screen_name, twittDaysInfo, twittUserInfo)
+            if int(create_at.strftime('%H')) in twittHoursInfo:
+                twittUserInfo = twittHoursInfo.get(int(create_at.strftime('%H')))
 
-                else:
-                    if 'normal' in twittUserInfo:
-                        # 상세정보 - 트윗수, 좋아요수
-                        updateTwittDetailInfo(status, 'normal', twittUserInfo)
-                                                
+                # 필터 문자열
+                for filterStr in constant.C_FILTER_KEYWORD:
+                    # 사용자가 필터 문자열에 포함되는지 확인
+                    if filterStr in status.user.name:
+                        # 사용자가 이미 저장되었는지 확인
+                        if 'ads' in twittUserInfo:
+                            # 상세정보 - 트윗수, 좋아요수
+                            updateTwittDetailInfo(status, 'ads', twittUserInfo)
+                            
+                        else:
+                            # 상세정보 - 트윗수, 좋아요수
+                            createTwittInfo(True, True, create_at, status, 'ads', twittDaysInfo, twittHoursInfo, twittUserInfo)
+
                     else:
-                        # 상세정보 - 트윗수, 좋아요수
-                        createTwittInfo(True, create_at, status, 'normal', twittDaysInfo, twittUserInfo)
+                        if 'normal' in twittUserInfo:
+                            # 상세정보 - 트윗수, 좋아요수
+                            updateTwittDetailInfo(status, 'normal', twittUserInfo)
+                                                    
+                        else:
+                            # 상세정보 - 트윗수, 좋아요수
+                            createTwittInfo(True, True, create_at, status, 'normal', twittDaysInfo, twittHoursInfo, twittUserInfo)
+
+            else:
+
+                # 새로운 시간을 위한 정보
+                twittUserInfo = {}
+
+                # 필터 문자열
+                for filterStr in constant.C_FILTER_KEYWORD:
+
+                    username = ''
+
+                    # 사용자가 필터 문자열에 포함되는지 확인
+                    if filterStr in status.user.name:
+                        username = 'ads'
+                    else:
+                        username = 'ads'
+
+                    # 상세정보 - 트윗수, 좋아요수    
+                    createTwittInfo(True, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
             
         else:
             # print('미존재 : ' + create_at_date)
@@ -149,14 +197,19 @@ def main(keyword):
             # 필터 문자열
             for filterStr in constant.C_FILTER_KEYWORD:
 
+                twittHoursInfo = {}
+                username = ''
+
                 # 사용자가 필터 문자열에 포함되는지 확인
                 if filterStr in status.user.name:
                     # 상세정보 - 트윗수, 좋아요수
-                    createTwittInfo(False, create_at, status, status.user.screen_name, twittDaysInfo, twittUserInfo)
-
+                    username = 'ads'
                 else:
                     # 상세정보 - 트윗수, 좋아요수
-                    createTwittInfo(False, create_at, status, 'normal', twittDaysInfo, twittUserInfo)
+                    username = 'normal'
+
+                # 상세정보 - 트윗수, 좋아요수
+                createTwittInfo(False, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
 
         # print(status)
         # print('-----------')
@@ -173,13 +226,11 @@ def main(keyword):
 
     print("'{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
     print(twittDaysInfo)
-    # print('-------------')
+    print('-------------')
     # print(list(twittDaysInfo.items()))
 
-    # for detail in twittDaysInfo:
-    #     print(twittDaysInfo.get(detail))
-    #     for detail1 in twittDaysInfo.get(detail):
-    #         print(twittDaysInfo.get(detail).get(detail1))
+    # 자료 저장
+    saveData(twittDaysInfo)
     
 def main_test1(keyword):
     # twitter api 연동시작
@@ -249,33 +300,6 @@ def main_test1(keyword):
     print("'{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
     print(twittDaysInfo)
 
-
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
-def saveData(twittInfolist):
-    scope = [
-    'https://spreadsheets.google.com/feeds',
-    'https://www.googleapis.com/auth/drive',
-    ]
-
-    json_file_name = 'gspread.json'
-
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
-    gc = gspread.authorize(credentials)
-
-
-    spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
-
-    # 스프레스시트 문서 가져오기 
-    doc = gc.open_by_url(spreadsheet_url)
-
-    # 시트 선택하기
-    worksheet = doc.worksheet('시트1')
-
-
-
-
 def main_test2(keyword):
     # twitter api 연동시작
     twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
@@ -296,8 +320,8 @@ def main_test2(keyword):
         create_at = datetime.datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + datetime.timedelta(hours=9)
         # 트윗일자
         create_at_date = create_at.strftime('%Y-%m-%d')
-
-        twittercls = twittPostInfo(status.id_str,
+        # 트윗
+        twitterPost = twittPostInfo(status.id_str,
                                     {
                                     'create_at': create_at,
                                     'create_at_date': create_at_date,
@@ -308,7 +332,7 @@ def main_test2(keyword):
                                     'retweet_count': status.retweet_count,
                                     })
 
-        twittInfolist.append(twittercls)
+        twittInfolist.append(twitterPost)
 
     # print(twittInfolist)
     # print('-------------')
@@ -317,35 +341,35 @@ def main_test2(keyword):
         # twittInfo.get_favorite_count()
 
     print('-------------')
-    collectInfo = {}
+    # collectInfo = {}
 
-    for twittInfo in twittInfolist:
+    # for twittInfo in twittInfolist:
         
-        collectHourlyInfo = {}
+    #     collectHourlyInfo = {}
 
-        for i in range(0, 24, 1):
+    #     for i in range(0, 24, 1):
 
-            if int(twittInfo._details['create_at'].strftime('%H')) == i:
+    #         if int(twittInfo._details['create_at'].strftime('%H')) == i:
 
-                if int(twittInfo._details['create_at'].strftime('%H')) in collectHourlyInfo:
-                    pass
-                else:
-                    collectHourlyInfo[i] = {
-                                            # 트윗수
-                                            'writeCnt': 1,
-                                            # 좋아요수
-                                            'likeCnt': status.favorite_count,
-                                            # 리트윗수
-                                            'retwittCnt': status.retweet_count
-                                            }
-                    if twittInfo._details['create_at_date'] in collectInfo:
-                        collectInfo = collectInfo.get(twittInfo._details['create_at_date'])
-                    else:                    
-                        collectInfo[twittInfo._details['create_at_date']] = collectHourlyInfo[i]
+    #             if int(twittInfo._details['create_at'].strftime('%H')) in collectHourlyInfo:
+    #                 pass
+    #             else:
+    #                 collectHourlyInfo[i] = {
+    #                                         # 트윗수
+    #                                         'writeCnt': 1,
+    #                                         # 좋아요수
+    #                                         'likeCnt': status.favorite_count,
+    #                                         # 리트윗수
+    #                                         'retwittCnt': status.retweet_count
+    #                                         }
+    #                 if twittInfo._details['create_at_date'] in collectInfo:
+    #                     collectInfo = collectInfo.get(twittInfo._details['create_at_date'])
+    #                 else:                    
+    #                     collectInfo[twittInfo._details['create_at_date']] = collectHourlyInfo[i]
 
-    print(collectInfo)
+    # print(collectInfo)
 
-    saveData(twittInfolist)
+    # saveData(twittInfolist)
 
 
 if __name__ == '__main__':

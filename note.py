@@ -7,7 +7,6 @@ for filter_str in constant.C_FILTER_KEYWORD:
     if filter_str in str:
         print('포함')
 
-
 # 일자별 트윗 정보 { '일자' : {'계정': {[게시글수, 좋아요수, 리트윗수]}}}
 twittDaysInfo = {}
 # 사용자별 트윗 정보
@@ -36,4 +35,13 @@ twittDetailInfo1['writeCnt'] += 1
 
 print(twittDaysInfo)
 
+print(twittUserInfo)
+
+print('hoursDic--------------------')
+hoursDic = {}
+
+for i in range(0, 24, 1):
+    hoursDic[i] = twittUserInfo
+
+print(hoursDic)
 

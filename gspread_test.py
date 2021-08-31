@@ -6,11 +6,6 @@ scope = [
 'https://www.googleapis.com/auth/drive',
 ]
 
-# scope = [
-# 'https://spreadsheets.google.com/auth/spreadsheets',
-# 'https://www.googleapis.com/auth/drive',
-# ]
-
 json_file_name = 'gspread.json'
 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
@@ -27,11 +22,19 @@ worksheet = doc.worksheet('시트1')
 
 # 1개 셀 읽기
 cell_data = worksheet.acell('A1').value
-print(cell_data)
+# print(cell_data)
 
 # 행 데이터 읽기
 row_data = worksheet.row_values(1)
-print(row_data)
+# print(row_data)
+
+all_values = worksheet.get_all_values()
+print(len(all_values))
+
+print()
+
+all_records = worksheet.get_all_records()
+print(len(all_records))
 
 # # 열 데이터 읽기
 # column_data = worksheet.col_values(1)
@@ -45,6 +48,12 @@ print(row_data)
 
 # # 특정 셀 쓰기
 # worksheet.update_acell('B1', 'b1 updated')
+some_data_sheet1 = [['name', 'email', 'phone'],
+ ['Paul', 'paul@naver.com', '010-1111-1111'],
+ ['Jennie', 'jennie@daum.net', '010-1234-5678'],
+ ['Chloe', 'chloe@gmail.com', '010-9999-9999']]
+
+worksheet.update_values(crange='A1:C6', values=some_data_sheet1)
 
 # # 행 추가1
 # worksheet.append_row(['new1', 'new2', 'new3', 'new4'])
