@@ -1,5 +1,6 @@
 import sys
 import twitter
+from twitter import Status
 import datetime
 # API KEY
 import secrets
@@ -8,6 +9,8 @@ import constant
 
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+import json
 
 class twittPostInfo():
     """
@@ -42,7 +45,7 @@ class twittPostInfo():
     def get_retweet_count(self):
         return self._details.get('retweet_count')
 
-def saveData(twittDaysInfo):
+def saveDataOnSpreadSheet(twittDaysInfo):
     """구글스프레드시트 저장"""
     scope = [
     'https://spreadsheets.google.com/feeds',
@@ -106,7 +109,15 @@ def createTwittInfo(dateExists, hourExists, create_at, status, user_name, twittD
 
 def getSearchTwittbyKeyword(twitter_api, keyword):
     # 키워드로 검색하기
-    statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent")
+    # statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True, since='2021-08-29', until='2021-09-01')
+    statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True)
+
+    # 검색결과 파일 저장
+    outfile = open("./history/{}.json".format(datetime.datetime.strftime(datetime.datetime.now(), '%y%m%d%H%M%S')), 'w')
+    json.dump(statuses, outfile)
+
+    # 리스트 변환
+    statuses = [Status.NewFromJsonDict(x) for x in statuses.get('statuses', '')]
 
     return statuses
 
@@ -120,14 +131,7 @@ def main(keyword):
     # 키워드로 검색하기
     statuses = getSearchTwittbyKeyword(twitter_api, keyword)
 
-    # # 검색하기 - 파일 저장
-    # import json
-    # statuses = twitter_api.GetSearch(term=query, count=100, result_type="recent", return_json=True)
-
-    # with open("./sample.json", 'w') as outfile:
-    #     json.dump(statuses, outfile)
-
-    # 일자별 트윗 정보 { '일자' : {'계정': {[게시글수, 좋아요수, 리트윗수]}}}
+    # 일자별 트윗 정보 {'일자' : {'시간': {'계정': {'게시글수':0, '좋아요수':0, '리트윗수':0}}}}
     twittDaysInfo = {}
 
     # 검색 내용 출력
@@ -138,36 +142,37 @@ def main(keyword):
         # 트윗일자
         create_at_date = create_at.strftime('%Y-%m-%d')
 
-        # 일자별 트윗 정보에 존재하는지 확인
+        # 일자별 트윗 정보가 존재하는지 확인
         if create_at_date in twittDaysInfo:
             # print('존재 : ' + create_at_date)
 
-            # 조회된 정보 가져오기 및 누적
+            # 일자별 정보 가져오기
             twittHoursInfo = twittDaysInfo.get(create_at_date)
 
+            # 시간별 트윗 정보가 존재하는지 확인
             if int(create_at.strftime('%H')) in twittHoursInfo:
                 twittUserInfo = twittHoursInfo.get(int(create_at.strftime('%H')))
 
-                # 필터 문자열
+                # 필터 문자열 확인
                 for filterStr in constant.C_FILTER_KEYWORD:
                     # 사용자가 필터 문자열에 포함되는지 확인
                     if filterStr in status.user.name:
                         # 사용자가 이미 저장되었는지 확인
                         if 'ads' in twittUserInfo:
-                            # 상세정보 - 트윗수, 좋아요수
+                            # 상세정보 업데이트 - 트윗수, 좋아요수, 리트윗수
                             updateTwittDetailInfo(status, 'ads', twittUserInfo)
                             
                         else:
-                            # 상세정보 - 트윗수, 좋아요수
+                            # 일자별, 시간별, 사용자별 자료 생성
                             createTwittInfo(True, True, create_at, status, 'ads', twittDaysInfo, twittHoursInfo, twittUserInfo)
 
                     else:
                         if 'normal' in twittUserInfo:
-                            # 상세정보 - 트윗수, 좋아요수
+                            # 상세정보 업데이트 - 트윗수, 좋아요수, 리트윗수
                             updateTwittDetailInfo(status, 'normal', twittUserInfo)
                                                     
                         else:
-                            # 상세정보 - 트윗수, 좋아요수
+                            # 일자별, 시간별, 사용자별 자료 생성
                             createTwittInfo(True, True, create_at, status, 'normal', twittDaysInfo, twittHoursInfo, twittUserInfo)
 
             else:
@@ -175,7 +180,7 @@ def main(keyword):
                 # 새로운 시간을 위한 정보
                 twittUserInfo = {}
 
-                # 필터 문자열
+                # 필터 문자열 확인
                 for filterStr in constant.C_FILTER_KEYWORD:
 
                     username = ''
@@ -184,9 +189,9 @@ def main(keyword):
                     if filterStr in status.user.name:
                         username = 'ads'
                     else:
-                        username = 'ads'
+                        username = 'normal'
 
-                    # 상세정보 - 트윗수, 좋아요수    
+                    # 일자별, 시간별, 사용자별 자료 생성
                     createTwittInfo(True, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
             
         else:
@@ -194,7 +199,7 @@ def main(keyword):
 
             twittUserInfo = {}
             
-            # 필터 문자열
+            # 필터 문자열 확인
             for filterStr in constant.C_FILTER_KEYWORD:
 
                 twittHoursInfo = {}
@@ -208,7 +213,7 @@ def main(keyword):
                     # 상세정보 - 트윗수, 좋아요수
                     username = 'normal'
 
-                # 상세정보 - 트윗수, 좋아요수
+                # 일자별, 시간별, 사용자별 자료 생성
                 createTwittInfo(False, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
 
         # print(status)
@@ -224,17 +229,16 @@ def main(keyword):
         # print('text : ' + status.text)
         # print('-----------')
 
-    print("'{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
-    print(twittDaysInfo)
-    print('-------------')
+    print("검색어 '{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
+    # print(twittDaysInfo)
+    # print('-------------')
     # print(list(twittDaysInfo.items()))
 
-    # 자료 저장
-    saveData(twittDaysInfo)
+    # 자료 저장 - 스프레드시트
+    saveDataOnSpreadSheet(twittDaysInfo)
     
 def main_test1(keyword):
     # twitter api 연동시작
-    # twitter_api = twitter.Api()
     twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
                             consumer_secret=secrets.TWITTER_CONSUMER_SECRET, 
                             access_token_key=secrets.TWITTER_ACCESS_TOKEN, 
@@ -245,8 +249,6 @@ def main_test1(keyword):
 
     # 일자별 트윗 정보 { '일자' : {[게시글수, 좋아요수, 리트윗수]}}
     twittDaysInfo = {}
-    # 일자별 트윗 정보 상세 - 게시물수, 좋아요수
-    # twittDetailInfo = {}
 
     # 검색 내용 출력
     for status in statuses:
@@ -282,20 +284,6 @@ def main_test1(keyword):
 
             # 일자별 상세정보 Dictionary
             twittDaysInfo[create_at_date] = twittDetailInfo
-
-
-        # # 출력
-        # print(status)
-        # print('id_str : ' + status.id_str)
-        # print('name : ' + status.user.name)
-        # print('screen_name : ' + status.user.screen_name)
-        # print('hashtags : ' + str(status.hashtags))
-        # print('favorite_count : ' + str(status.favorite_count))
-        # print('retweet_count : ' + str(status.retweet_count))
-        # print('create_at : ' + str(create_at))
-        # # print(status.text.encode('utf-8'))
-        # print('text : ' + status.text)
-        # print('-----------')
 
     print("'{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
     print(twittDaysInfo)
@@ -369,7 +357,7 @@ def main_test2(keyword):
 
     # print(collectInfo)
 
-    # saveData(twittInfolist)
+    # saveDataOnSpreadSheet(twittInfolist)
 
 
 if __name__ == '__main__':
@@ -384,46 +372,3 @@ if __name__ == '__main__':
     main(sys.argv[1])
     # main_test1(sys.argv[1])
     # main_test2(sys.argv[1])
-
-    
-# {
-#     '2021-08-30': {'writeCnt': 2, 'likeCnt': 6}, 
-#     '2021-08-29': {'writeCnt': 4, 'likeCnt': 1}, 
-#     '2021-08-28': {'writeCnt': 5, 'likeCnt': 10}, 
-#     '2021-08-27': {'writeCnt': 2, 'likeCnt': 4}, 
-#     '2021-08-26': {'writeCnt': 2, 'likeCnt': 3}, 
-#     '2021-08-25': {'writeCnt': 4, 'likeCnt': 10}, 
-#     '2021-08-24': {'writeCnt': 18, 'likeCnt': 33}, 
-#     '2021-08-23': {'writeCnt': 6, 'likeCnt': 2}, 
-#     '2021-08-22': {'writeCnt': 10, 'likeCnt': 11}
-#     }
-
-# {
-#     '2021-08-30': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}},
-#     '2021-08-29': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17}, 
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}}, 
-#     '2021-08-28': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17}, 
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}}, 
-#     '2021-08-27': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}},
-#     '2021-08-26': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}},
-#     '2021-08-25': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}},
-#     '2021-08-24': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17}, 
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}}, 
-#     '2021-08-23': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}},
-#     '2021-08-22': {
-#         'human': {'writeCnt': 6, 'likeCnt': 7, 'retwittCnt': 17},
-#         'sell_coupons': {'writeCnt': 3, 'likeCnt': 0, 'retwittCnt': 713}}
-# }

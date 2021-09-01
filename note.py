@@ -1,3 +1,4 @@
+import datetime
 import constant
 
 str = "TTA AAAAAA"
@@ -45,3 +46,13 @@ for i in range(0, 24, 1):
 
 print(hoursDic)
 
+
+
+now = datetime.datetime.now()
+
+print(now)
+
+nowStr = datetime.datetime.strftime(datetime.datetime.now(), '%y%m%d%H%M')
+path = "./history/{}.json".format(datetime.datetime.strftime(datetime.datetime.now(), '%y%m%d%H%M%S'))
+
+print(path)

@@ -92,3 +92,5 @@ gspread.json
 
 # TEST 스크립트
 /test/
+# 실행 결과 json 파일
+/history/
