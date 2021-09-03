@@ -1,16 +1,21 @@
 import sys
+from datetime import datetime, timedelta
+import json
+
+# python-twitter
 import twitter
 from twitter import Status
-import datetime
 # API KEY
 import secrets
 # 필터 문자열
 import constant
 
+# 구글 스프레드시트
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-import json
+# 이메일 발송
+import send_email
 
 class twittPostInfo():
     """
@@ -63,8 +68,21 @@ def saveDataOnSpreadSheet(twittDaysInfo):
     # 스프레스시트 문서 가져오기 
     doc = gc.open_by_url(spreadsheet_url)
 
+    # 스프레드시트 문서명
+    worksheetName = datetime.strftime(nowtime, '%Y%m')
+
     # 시트 선택하기
-    worksheet = doc.worksheet('시트1')
+    worksheet = doc.worksheet(worksheetName)
+
+    # 시트 자료 가져오기
+    worksheetDatas = worksheet.get_all_records()
+
+    # # 1일이면 시트 생성
+    # if datetime.strftime(nowtime, '%d') == '1':
+    #     # 시트 생성
+    #     worksheet = doc.add_worksheet(title=worksheetName, rows='1000', cols='22')
+    #     # 타이틀 추가
+    #     worksheet.append_row(constant.C_SPREADSHEET_TITLE)
     
     # 스프레드시트 작성
     for postDate, hourData in sorted(twittDaysInfo.items()):
@@ -72,19 +90,77 @@ def saveDataOnSpreadSheet(twittDaysInfo):
         for hour, campaignData in sorted(hourData.items()):
             # print(postDate, hour, campaignData)
             for campaign, postData in campaignData.items():
-                # print(postDate, hour, campaign, list(postData.values())[0], list(postData.values())[1], list(postData.values())[2])
-                worksheet.append_row([str(postDate), str(hour), str(campaign), list(postData.values())[0], list(postData.values())[1], list(postData.values())[2]])
+
+                # 추가 작성 필요 여부
+                appendYN = True
+
+                # 스프레드시트 내용 확인
+                for worksheetData in worksheetDatas:
+                    # 스프레드시트의 일자/시간과 수집한 일자/시간과 일치하는지 확인
+                    if worksheetData['게시일자'] == str(postDate) and worksheetData['시간(24시)'] == int(hour):
+                        ##### 업데이트 필요
+                        # print('존재')
+                        appendYN = False
+
+                        # 스프레드시트 행 수 ( +2 : 인덱스 0부터 시작 / 타이틀 )
+                        rowCnt = worksheetDatas.index(worksheetData) + 2
+
+                        # 스프레드시트 열
+                        colName = "H"
+
+                        # 게시일자 + n일이 수집일자와 같은지 확인
+                        for i in range(0, 7):
+                            if (datetime.strptime(worksheetData['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) == 
+                                datetime.strptime(datetime.strftime(nowtime, '%Y-%m-%d'), '%Y-%m-%d')):
+                                print('게시일자 + {}일이 수집일자와 동일'.format(i+1))
+                                colName = chr(ord(colName) + i)
+
+                                # 스프레드시트 작성
+                                worksheet.update_acell('{}{}'.format(colName, rowCnt), list(postData.values())[1] + list(postData.values())[2])
+
+                                pass
+
+                if appendYN == True:
+                    ##### 추가 작성 필요
+                    print('신규')
+                    # 작성
+                    worksheet.append_row([
+                                        #   datetime.strftime(nowtime, '%Y-%m-%d %H:%M:%S')
+                                        datetime.strftime(nowtime, '%Y-%m-%d %H')
+                                        , str(postDate)
+                                        , str(hour)
+                                        , str(campaign)
+                                        , list(postData.values())[0]
+                                        , list(postData.values())[1]
+                                        , list(postData.values())[2]
+                                        , "", "", "", "", "", "", ""
+                                        , "추가"
+                                        ])
+
+    print('스프레드시트 작성 종료')
+
+    # 메일 발송
+    result = send_email.sendEmail(constant.C_ADMIN_MAIL_ADDRESS)
+
+    print('메일 발송 결과 : {}'.format(result))
 
 
 def updateTwittDetailInfo(status, user_name, twittUserInfo):
-    # Update 상세정보 - 트윗수, 좋아요수
+    """
+    desc : Update 상세정보 - 트윗수, 좋아요수, 리트윗수
+    parms: 날짜존재여부, 시간존재여부, 일시, TwittRowInfo, 계정유형(normal, ads), 일자별트윗정보, 시간별트윗정보, 계정유형별트윗정보
+    """
     twittDetailInfo = twittUserInfo.get(user_name)
 
     twittDetailInfo['writeCnt'] += 1
     twittDetailInfo['likeCnt'] += status.favorite_count
     twittDetailInfo['retwittCnt'] += status.retweet_count
 
-def createTwittInfo(dateExists, hourExists, create_at, status, user_name, twittDaysInfo, twittHoursInfo, twittUserInfo):
+def createTwittInfo(dateExists, hourExists, create_at, status, userType, twittDaysInfo, twittHoursInfo, twittUserInfo):
+    """
+    desc : 트윗정보 생성 - 일자별트윗정보, 시간별트윗정보, 계정유형별트윗정보, 상세트윗정보
+    parms: 날짜존재여부, 시간존재여부, 일시, TwittRowInfo, 계정유형(normal, ads), 일자별트윗정보, 시간별트윗정보, 계정유형별트윗정보
+    """
     # 트윗일자
     create_at_date = create_at.strftime('%Y-%m-%d')
 
@@ -97,13 +173,15 @@ def createTwittInfo(dateExists, hourExists, create_at, status, user_name, twittD
             # 리트윗수
             'retwittCnt': status.retweet_count
     }
-    twittUserInfo[user_name] = twittDetailInfo
+    # 계정유형별 자료 추가
+    twittUserInfo[userType] = twittDetailInfo
 
     if hourExists == False:
-        twittHoursInfo[int(create_at.strftime('%H'))] = twittUserInfo
+        # 시간별 자료 추가
+        twittHoursInfo[create_at.strftime('%H')] = twittUserInfo
 
     if dateExists == False:
-        # twittDaysInfo[create_at_date] = twittUserInfo
+        # 일자별 자료 추가
         twittDaysInfo[create_at_date] = twittHoursInfo
 
 
@@ -113,7 +191,7 @@ def getSearchTwittbyKeyword(twitter_api, keyword):
     statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True)
 
     # 검색결과 파일 저장
-    outfile = open("./history/{}.json".format(datetime.datetime.strftime(datetime.datetime.now(), '%y%m%d%H%M%S')), 'w')
+    outfile = open("./history/{}.json".format(datetime.strftime(nowtime, '%y%m%d%H%M%S')), 'w')
     json.dump(statuses, outfile)
 
     # 리스트 변환
@@ -121,7 +199,7 @@ def getSearchTwittbyKeyword(twitter_api, keyword):
 
     return statuses
 
-def main(keyword):
+def main(keyword, nowtime):
     # twitter api 연동시작
     twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
                             consumer_secret=secrets.TWITTER_CONSUMER_SECRET, 
@@ -131,112 +209,105 @@ def main(keyword):
     # 키워드로 검색하기
     statuses = getSearchTwittbyKeyword(twitter_api, keyword)
 
-    # 일자별 트윗 정보 {'일자' : {'시간': {'계정': {'게시글수':0, '좋아요수':0, '리트윗수':0}}}}
+    # 일자별 트윗 정보 {'일자' : {'시간': {'캠페인': {'게시글수':0, '좋아요수':0, '리트윗수':0}}}}
     twittDaysInfo = {}
 
     # 검색 내용 출력
     for status in statuses:
-        
+
         # 트윗일시
-        create_at = datetime.datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + datetime.timedelta(hours=9)
+        create_at = datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + timedelta(hours=9)
         # 트윗일자
         create_at_date = create_at.strftime('%Y-%m-%d')
 
+        # 광고성 계정인지 확인
+        filterList = [element for element in constant.C_FILTER_KEYWORD if(element in status.user.name)]
+        # 계정
+        userType = 'ads' if bool(filterList) is True else 'normal'
+
         # 일자별 트윗 정보가 존재하는지 확인
         if create_at_date in twittDaysInfo:
-            # print('존재 : ' + create_at_date)
-
+            ##### 일자별 트윗 정보 존재
             # 일자별 정보 가져오기
             twittHoursInfo = twittDaysInfo.get(create_at_date)
 
             # 시간별 트윗 정보가 존재하는지 확인
-            if int(create_at.strftime('%H')) in twittHoursInfo:
-                twittUserInfo = twittHoursInfo.get(int(create_at.strftime('%H')))
-
-                # 필터 문자열 확인
-                for filterStr in constant.C_FILTER_KEYWORD:
-                    # 사용자가 필터 문자열에 포함되는지 확인
-                    if filterStr in status.user.name:
-                        # 사용자가 이미 저장되었는지 확인
-                        if 'ads' in twittUserInfo:
-                            # 상세정보 업데이트 - 트윗수, 좋아요수, 리트윗수
-                            updateTwittDetailInfo(status, 'ads', twittUserInfo)
-                            
-                        else:
-                            # 일자별, 시간별, 사용자별 자료 생성
-                            createTwittInfo(True, True, create_at, status, 'ads', twittDaysInfo, twittHoursInfo, twittUserInfo)
-
-                    else:
-                        if 'normal' in twittUserInfo:
-                            # 상세정보 업데이트 - 트윗수, 좋아요수, 리트윗수
-                            updateTwittDetailInfo(status, 'normal', twittUserInfo)
-                                                    
-                        else:
-                            # 일자별, 시간별, 사용자별 자료 생성
-                            createTwittInfo(True, True, create_at, status, 'normal', twittDaysInfo, twittHoursInfo, twittUserInfo)
+            if create_at.strftime('%H') in twittHoursInfo:
+                ##### 시간별 트윗 정보가 존재
+                twittUserInfo = twittHoursInfo.get(create_at.strftime('%H'))
+                
+                # 사용자가 이미 저장되었는지 확인
+                if userType in twittUserInfo:
+                    # 상세정보 업데이트 - 트윗수, 좋아요수, 리트윗수
+                    updateTwittDetailInfo(status, userType, twittUserInfo)
+                    
+                else:
+                    # 일자별, 시간별, 사용자별 자료 생성
+                    createTwittInfo(True, True, create_at, status, userType, twittDaysInfo, twittHoursInfo, twittUserInfo)
 
             else:
-
+                ##### 시간별 트윗 정보가 미존재
                 # 새로운 시간을 위한 정보
                 twittUserInfo = {}
 
-                # 필터 문자열 확인
-                for filterStr in constant.C_FILTER_KEYWORD:
-
-                    username = ''
-
-                    # 사용자가 필터 문자열에 포함되는지 확인
-                    if filterStr in status.user.name:
-                        username = 'ads'
-                    else:
-                        username = 'normal'
-
-                    # 일자별, 시간별, 사용자별 자료 생성
-                    createTwittInfo(True, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
+                # 일자별, 시간별, 사용자별 자료 생성
+                createTwittInfo(True, False, create_at, status, userType, twittDaysInfo, twittHoursInfo, twittUserInfo)
             
         else:
-            # print('미존재 : ' + create_at_date)
-
+            ##### 일자별 트윗 정보 미존재
             twittUserInfo = {}
-            
-            # 필터 문자열 확인
-            for filterStr in constant.C_FILTER_KEYWORD:
+            twittHoursInfo = {}
 
-                twittHoursInfo = {}
-                username = ''
-
-                # 사용자가 필터 문자열에 포함되는지 확인
-                if filterStr in status.user.name:
-                    # 상세정보 - 트윗수, 좋아요수
-                    username = 'ads'
-                else:
-                    # 상세정보 - 트윗수, 좋아요수
-                    username = 'normal'
-
-                # 일자별, 시간별, 사용자별 자료 생성
-                createTwittInfo(False, False, create_at, status, username, twittDaysInfo, twittHoursInfo, twittUserInfo)
+            # 일자별, 시간별, 사용자별 자료 생성
+            createTwittInfo(False, False, create_at, status, userType, twittDaysInfo, twittHoursInfo, twittUserInfo)
 
         # print(status)
-        # print('-----------')
-        # print('id_str : ' + status.id_str)
-        # print('name : ' + status.user.name)
-        # print('screen_name : ' + status.user.screen_name)
-        # print('hashtags : ' + str(status.hashtags))
-        # print('favorite_count : ' + str(status.favorite_count))
-        # print('retweet_count : ' + str(status.retweet_count))
-        # print('create_at : ' + str(create_at))
-        # # print(status.text.encode('utf-8'))
-        # print('text : ' + status.text)
-        # print('-----------')
+        print('-----------')
+        print('id_str : ' + status.id_str)
+        print('name : ' + status.user.name)
+        print('screen_name : ' + status.user.screen_name)
+        print('hashtags : ' + str(status.hashtags))
+        print('favorite_count : ' + str(status.favorite_count))
+        print('retweet_count : ' + str(status.retweet_count))
+        print('create_at : ' + str(create_at))
+        # print(status.text.encode('utf-8'))
+        print('text : ' + status.text)
 
+    print('')
     print("검색어 '{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
-    # print(twittDaysInfo)
+    print(twittDaysInfo)
     # print('-------------')
     # print(list(twittDaysInfo.items()))
 
-    # 자료 저장 - 스프레드시트
+    # 자료 저장(스프레드시트) 및 메일 발송(gmail)
     saveDataOnSpreadSheet(twittDaysInfo)
-    
+
+if __name__ == '__main__':
+
+    # 기본 검색어
+    keyword = '에피민트'
+    # 확장 검색어 - 리트윗 제외
+    extword = 'AND exclude:retweets'
+    # extword = 'AND exclude:retweets AND filter:quote'
+    # Full 검색키워드
+    fullkeyword = '{} {}'.format(keyword, extword)
+
+    # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
+    if len(sys.argv) == 1:
+        sys.argv.append(fullkeyword)
+    else:
+        fullkeyword = '{} {}'.format(sys.argv[1], extword)
+
+    # sys.argv.append(fullkeyword) if len(sys.argv) == 1 else fullkeyword = '{} {}'.format(sys.argv[1], extword)
+
+    # 현재일시
+    nowtime = datetime.now()
+
+    # main 호출
+    main(fullkeyword, nowtime)
+    # main_test1(keyword)
+    # main_test2(keyword)
+
 def main_test1(keyword):
     # twitter api 연동시작
     twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
@@ -254,7 +325,7 @@ def main_test1(keyword):
     for status in statuses:
 
         # 트윗일시
-        create_at = datetime.datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + datetime.timedelta(hours=9)
+        create_at = datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + timedelta(hours=9)
         # 트윗일자
         create_at_date = create_at.strftime('%Y-%m-%d')
 
@@ -305,7 +376,7 @@ def main_test2(keyword):
     for status in statuses:
 
         # 트윗일시
-        create_at = datetime.datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + datetime.timedelta(hours=9)
+        create_at = datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + timedelta(hours=9)
         # 트윗일자
         create_at_date = create_at.strftime('%Y-%m-%d')
         # 트윗
@@ -358,17 +429,3 @@ def main_test2(keyword):
     # print(collectInfo)
 
     # saveDataOnSpreadSheet(twittInfolist)
-
-
-if __name__ == '__main__':
-
-    # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
-    if len(sys.argv) == 1:
-        sys.argv.append('에피민트')
-
-    print('-----------')
-
-    # main 실행
-    main(sys.argv[1])
-    # main_test1(sys.argv[1])
-    # main_test2(sys.argv[1])

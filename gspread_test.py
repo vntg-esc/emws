@@ -1,6 +1,8 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+import constant
+
 scope = [
 'https://spreadsheets.google.com/feeds',
 'https://www.googleapis.com/auth/drive',
@@ -18,23 +20,32 @@ spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4m
 doc = gc.open_by_url(spreadsheet_url)
 
 # 시트 선택하기
-worksheet = doc.worksheet('시트1')
+worksheet = doc.worksheet('202109')
 
-# 1개 셀 읽기
-cell_data = worksheet.acell('A1').value
-# print(cell_data)
+worksheetDatas = worksheet.get_all_records()
+for worksheetData in worksheetDatas:
+    print(worksheetData['게시일자'])
+    # print(worksheetData)
 
-# 행 데이터 읽기
-row_data = worksheet.row_values(1)
-# print(row_data)
+# print(worksheetData)
 
-all_values = worksheet.get_all_values()
-print(len(all_values))
+# worksheet.append_row(['2021-09-02 15', '2021-09-02', '15', 'normal', '1', '0', '0'])
 
-print()
+# # 1개 셀 읽기
+# cell_data = worksheet.acell('A1').value
+# # print(cell_data)
 
-all_records = worksheet.get_all_records()
-print(len(all_records))
+# # 행 데이터 읽기
+# row_data = worksheet.row_values(1)
+# # print(row_data)
+
+# all_values = worksheet.get_all_values()
+# print(len(all_values))
+
+# print()
+
+# all_records = worksheet.get_all_records()
+# print(len(all_records))
 
 # # 열 데이터 읽기
 # column_data = worksheet.col_values(1)
@@ -48,12 +59,12 @@ print(len(all_records))
 
 # # 특정 셀 쓰기
 # worksheet.update_acell('B1', 'b1 updated')
-some_data_sheet1 = [['name', 'email', 'phone'],
- ['Paul', 'paul@naver.com', '010-1111-1111'],
- ['Jennie', 'jennie@daum.net', '010-1234-5678'],
- ['Chloe', 'chloe@gmail.com', '010-9999-9999']]
+# some_data_sheet1 = [['name', 'email', 'phone'],
+#  ['Paul', 'paul@naver.com', '010-1111-1111'],
+#  ['Jennie', 'jennie@daum.net', '010-1234-5678'],
+#  ['Chloe', 'chloe@gmail.com', '010-9999-9999']]
 
-worksheet.update_values(crange='A1:C6', values=some_data_sheet1)
+# worksheet.update_values(crange='A1:C6', values=some_data_sheet1)
 
 # # 행 추가1
 # worksheet.append_row(['new1', 'new2', 'new3', 'new4'])
@@ -67,8 +78,10 @@ worksheet.update_values(crange='A1:C6', values=some_data_sheet1)
 # # 스프레드시트 추가
 # gs = gc.create('{스프레드 시트명}')
 
-# # 시트 추가
-# worksheet = gs.add_worksheet(title='{시트명}', rows='{행 수}', cols='{열 수}')
+# 시트 추가
+# worksheet = doc.add_worksheet(title='202111', rows='1000', cols='22')
+# print(worksheet)
+# # worksheet.append_row(constant.C_SPREADSHEET_TITLE)
 
 # # 계정 공유
 # gs.share('{이메일 주소}', perm_type='user', role='{권한}')
