@@ -127,3 +127,18 @@ for i in range(0, 7):
         print('게시일자 + {}일이 수집일자와 동일'.format(i+1))
         print(chr(ord(colName) + i))
         pass
+
+keyword = '에피민트'
+# 확장 검색어 - 리트윗 제외
+extword = 'AND exclude:retweets'
+# extword = 'AND exclude:retweets AND filter:quote'
+# Full 검색키워드
+fullkeyword = f'{keyword} {extword}'
+print(fullkeyword)
+
+
+def test_kwargs(test1, **kwargs):
+    print(test1)
+    print(kwargs['keyword1234'])
+
+test_kwargs('test1', keyword1234='1234')
