@@ -1,4 +1,4 @@
-# ads - usertype 필터 문자열
+# 필터 문자열 : status.user.name에 해당 문자열이 포함되어 있으면 user_type을'ads'로 분류
 C_FILTER_KEYWORD = [
     'TTA',
     'epimint',
