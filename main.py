@@ -289,22 +289,23 @@ def save_data_on_spreadsheet(twitt_days_info):
 
 if __name__ == '__main__':
 
-    # 기본 검색어
+    # 기본 검색어 - 해시태그 포함
     keywordsimple = '에피민트'
     keyword = f'({keywordsimple} OR #{keywordsimple})'
+
     # 확장 검색어 - 리트윗 제외
     extword = 'AND exclude:retweets'
     # extword = 'AND exclude:retweets AND filter:quote'
+
     # Full 검색키워드
     full_keyword = f'{keyword} {extword}'
 
     # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
+    # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
     if len(sys.argv) == 1:
         sys.argv.append(full_keyword)
     else:
         full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
-
-    # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
 
     # 현재일시
     now_time = datetime.now()
@@ -313,125 +314,3 @@ if __name__ == '__main__':
     main(full_keyword)
     # main_test1(keyword)
     # main_test2(keyword)
-
-def main_test1(keyword):
-    # twitter api 연동시작
-    twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
-                            consumer_secret=secrets.TWITTER_CONSUMER_SECRET, 
-                            access_token_key=secrets.TWITTER_ACCESS_TOKEN, 
-                            access_token_secret=secrets.TWITTER_ACCESS_SECRET)
-
-    # 키워드로 검색하기
-    statuses = get_search_twitt_by_keyword(twitter_api, keyword)
-
-    # 일자별 트윗 정보 { '일자' : {[게시글수, 좋아요수, 리트윗수]}}
-    twitt_days_info = {}
-
-    # 검색 내용 출력
-    for status in statuses:
-
-        # 트윗일시
-        create_at = datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + timedelta(hours=9)
-        # 트윗일자
-        create_at_date = create_at.strftime('%Y-%m-%d')
-
-        # 일자별 트윗 정보에 존재하는지 확인
-        if create_at_date in twitt_days_info:
-            print('존재 : ' + create_at_date)
-
-            # 조회된 정보 가져오기 및 누적
-            twitt_detail_info = twitt_days_info.get(create_at_date)
-
-            twitt_detail_info['write_count'] += 1
-            twitt_detail_info['like_count'] = twitt_detail_info['like_count'] +  status.favorite_count
-            twitt_detail_info['retwitt_count'] = twitt_detail_info['retwitt_count'] +  status.retweet_count
-            
-        else:
-            print('미존재 : ' + create_at_date)
-            
-            # 상세정보 - 트윗수, 좋아요수
-            twitt_detail_info = {
-                                # 트윗수
-                                'write_count': 1,
-                                # 좋아요수
-                                'like_count': status.favorite_count,
-                                # 리트윗수
-                                'retwitt_count': status.retweet_count
-                            }
-
-            # 일자별 상세정보 Dictionary
-            twitt_days_info[create_at_date] = twitt_detail_info
-
-    print("'{}'로 검색된 건수 : {}건".format(keyword, len(statuses)))
-    print(twitt_days_info)
-
-def main_test2(keyword):
-    # twitter api 연동시작
-    twitter_api = twitter.Api(consumer_key=secrets.TWITTER_CONSUMER_KEY,
-                              consumer_secret=secrets.TWITTER_CONSUMER_SECRET, 
-                              access_token_key=secrets.TWITTER_ACCESS_TOKEN, 
-                              access_token_secret=secrets.TWITTER_ACCESS_SECRET)
-
-    # 키워드로 검색하기
-    statuses = get_search_twitt_by_keyword(twitter_api, keyword)
-
-    # 트윗 리스트
-    twittInfolist = []
-
-    # 검색 내용 출력
-    for status in statuses:
-
-        # 트윗일시
-        create_at = datetime.strptime(status.created_at,'%a %b %d %H:%M:%S +0000 %Y') + timedelta(hours=9)
-        # 트윗일자
-        create_at_date = create_at.strftime('%Y-%m-%d')
-        # 트윗
-        twitterPost = twittPostInfo(status.id_str,
-                                    {
-                                    'create_at': create_at,
-                                    'create_at_date': create_at_date,
-                                    'user_name': status.user.name, 
-                                    'user_screen_name': status.user.screen_name,
-                                    'text': status.text,
-                                    'favorite_count': status.favorite_count,
-                                    'retweet_count': status.retweet_count,
-                                    })
-
-        twittInfolist.append(twitterPost)
-
-    # print(twittInfolist)
-    # print('-------------')
-    for twittInfo in twittInfolist:
-        print(twittInfo)
-        # twittInfo.get_favorite_count()
-
-    print('-------------')
-    # collectInfo = {}
-
-    # for twittInfo in twittInfolist:
-        
-    #     collectHourlyInfo = {}
-
-    #     for i in range(0, 24, 1):
-
-    #         if int(twittInfo._details['create_at'].strftime('%H')) == i:
-
-    #             if int(twittInfo._details['create_at'].strftime('%H')) in collectHourlyInfo:
-    #                 pass
-    #             else:
-    #                 collectHourlyInfo[i] = {
-    #                                         # 트윗수
-    #                                         'write_count': 1,
-    #                                         # 좋아요수
-    #                                         'like_count': status.favorite_count,
-    #                                         # 리트윗수
-    #                                         'retwitt_count': status.retweet_count
-    #                                         }
-    #                 if twittInfo._details['create_at_date'] in collectInfo:
-    #                     collectInfo = collectInfo.get(twittInfo._details['create_at_date'])
-    #                 else:                    
-    #                     collectInfo[twittInfo._details['create_at_date']] = collectHourlyInfo[i]
-
-    # print(collectInfo)
-
-    # save_data_on_spreadsheet(twittInfolist)
