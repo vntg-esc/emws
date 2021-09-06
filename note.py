@@ -1,3 +1,4 @@
+import sys, os
 from datetime import datetime, timedelta
 import constant
 
@@ -164,3 +165,16 @@ keywordsimple = '에피민트'
 keyword = f'{keywordsimple} OR #{keywordsimple}'
 
 print(keyword)
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller"""
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path =  sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+print(resource_path('aaa.py'))
+print(resource_path('history\{}.json'))

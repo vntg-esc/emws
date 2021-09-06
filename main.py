@@ -7,8 +7,11 @@ import twitter
 from twitter import Status
 # API KEY
 import secrets
-# 필터 문자열
+# 상수
 import constant
+
+# 공통 모듈
+import common
 
 # 구글 스프레드시트
 import gspread
@@ -96,7 +99,7 @@ def get_search_twitt_by_keyword(twitter_api, keyword):
     statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True)
 
     # 검색결과 파일 저장
-    outfile = open("C:\GitHub\VNTG-N-ERP\emws\history\{}.json".format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
+    outfile = open(common.resource_path('history\{}.json').format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
     json.dump(statuses, outfile)
 
     # 리스트 변환
@@ -167,14 +170,14 @@ def main(keyword):
             create_twitt_info(create_at, status, user_type, twitt_days_info, twitt_hours_info, twitt_user_info, date_exists=False, hour_exists=False)
 
         # # print(status)
-        print('-----------')
-        print('id_str : ' + status.id_str)
-        print('name : ' + status.user.name)
-        print('screen_name : ' + status.user.screen_name)
-        print('hashtags : ' + str(status.hashtags))
-        print('favorite_count : ' + str(status.favorite_count))
-        print('retweet_count : ' + str(status.retweet_count))
-        print('create_at : ' + str(create_at))
+        # print('-----------')
+        # print('id_str : ' + status.id_str)
+        # print('name : ' + status.user.name)
+        # print('screen_name : ' + status.user.screen_name)
+        # print('hashtags : ' + str(status.hashtags))
+        # print('favorite_count : ' + str(status.favorite_count))
+        # print('retweet_count : ' + str(status.retweet_count))
+        # print('create_at : ' + str(create_at))
         # # print(status.text.encode('utf-8'))
         # print('text : ' + status.text)
 
@@ -194,7 +197,7 @@ def save_data_on_spreadsheet(twitt_days_info):
     'https://www.googleapis.com/auth/drive',
     ]
 
-    json_file_name = 'C:\GitHub\VNTG-N-ERP\emws\gspread.json'
+    json_file_name = common.resource_path('gspread.json')
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
     gc = gspread.authorize(credentials)
