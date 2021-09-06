@@ -96,3 +96,5 @@ test/
 history/
 # 실행 결과 log 파일
 log/
+# aws private kep - pem
+aws_emws_key.pem
