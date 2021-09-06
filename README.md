@@ -20,6 +20,9 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 
 - Scripts Path : https://github.com/vntg-esc/emws
 
+- 실행서버 : AWS EC2 Ubuntu Server 18.04 LTS (HVM), 프리티어
+    - ip : 15.164.219.146
+
 
 ## 상세내용
 - 검색어
