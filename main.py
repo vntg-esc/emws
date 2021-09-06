@@ -283,7 +283,7 @@ def save_data_on_spreadsheet(twitt_days_info):
     logger.info('스프레드시트 작성 종료')
 
     # 메일 발송
-    send_email_result = send_email.send_email(constant.C_ADMIN_MAIL_ADDRESS)
+    send_email_result = send_email.send_email(constant.C_ADMIN_MAIL_ADDRESS, logfile_path)
 
     logger.info(f'메일 발송 결과 : {send_email_result}')
 

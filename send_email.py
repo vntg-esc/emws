@@ -1,14 +1,19 @@
 # Import smtplib for the actual sending function
 from datetime import datetime
+import os
+
 import smtplib
 
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email import encoders
 # 상수
 import constant
 # 공통 모듈
 import common
 
-def send_email(email_to):
+def send_email(email_to, logfile_path):
     """
     parms - 수신 메일주소
     """
@@ -26,10 +31,21 @@ def send_email(email_to):
 
 
     # Create a text/plain message
-    msg = MIMEText(email_content, 'html')
+    msg = MIMEMultipart()
     msg['From'] = email_from
     msg['To'] = email_to
     msg['Subject'] = email_subject
+
+    body = MIMEText(email_content, 'html', 'utf-8')
+    msg.attach(body)
+
+    # 첨부파일 추가
+    attach_binary = MIMEBase('application', 'octet-stream')
+    binary = open(logfile_path, 'rb').read()
+    attach_binary.set_payload(binary)
+    encoders.encode_base64(attach_binary)
+    attach_binary.add_header('Content-Disposition', 'attachment', filename=os.path.basename(logfile_path))
+    msg.attach(attach_binary)
 
     smtp = smtplib.SMTP('smtp.gmail.com', 587)
     smtp.starttls()
