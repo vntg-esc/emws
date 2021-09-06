@@ -167,14 +167,14 @@ def main(keyword):
             create_twitt_info(create_at, status, user_type, twitt_days_info, twitt_hours_info, twitt_user_info, date_exists=False, hour_exists=False)
 
         # # print(status)
-        # print('-----------')
-        # print('id_str : ' + status.id_str)
-        # print('name : ' + status.user.name)
-        # print('screen_name : ' + status.user.screen_name)
-        # print('hashtags : ' + str(status.hashtags))
-        # print('favorite_count : ' + str(status.favorite_count))
-        # print('retweet_count : ' + str(status.retweet_count))
-        # print('create_at : ' + str(create_at))
+        print('-----------')
+        print('id_str : ' + status.id_str)
+        print('name : ' + status.user.name)
+        print('screen_name : ' + status.user.screen_name)
+        print('hashtags : ' + str(status.hashtags))
+        print('favorite_count : ' + str(status.favorite_count))
+        print('retweet_count : ' + str(status.retweet_count))
+        print('create_at : ' + str(create_at))
         # # print(status.text.encode('utf-8'))
         # print('text : ' + status.text)
 
@@ -285,7 +285,8 @@ def save_data_on_spreadsheet(twitt_days_info):
 if __name__ == '__main__':
 
     # 기본 검색어
-    keyword = '에피민트'
+    keywordsimple = '에피민트'
+    keyword = f'({keywordsimple} OR #{keywordsimple})'
     # 확장 검색어 - 리트윗 제외
     extword = 'AND exclude:retweets'
     # extword = 'AND exclude:retweets AND filter:quote'
@@ -296,7 +297,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         sys.argv.append(full_keyword)
     else:
-        full_keyword = f'{sys.argv[1]} {extword}'
+        full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
 
     # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
 

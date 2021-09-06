@@ -155,7 +155,12 @@ def test_kwargs(test1, **kwargs):
 
 test_dic = {'2021-09-03': {'14': {'normal': {'write_count': 1, 'like_count': 2, 'retwitt_count': 0}}}, '2021-09-02': {'15': {'normal': {'write_count': 1, 'like_count': 1, 'retwitt_count': 0}}}, '2021-09-01': {'22': {'normal': {'write_count': 1, 'like_count': 1, 'retwitt_count': 0}}}, '2021-08-31': {'23': {'normal': {'write_count': 1, 'like_count': 1, 'retwitt_count': 0}}}, '2021-08-30': {'11': {'normal': {'write_count': 1, 'like_count': 2, 'retwitt_count': 0}}}, '2021-08-29': {'23': {'normal': {'write_count': 1, 'like_count': 1, 'retwitt_count': 0}}}, '2021-08-28': {'23': {'normal': {'write_count': 1, 'like_count': 0, 'retwitt_count': 0}}}, '2021-08-27': {'22': {'normal': {'write_count': 1, 'like_count': 2, 'retwitt_count': 0}}}, '2021-08-26': {'21': {'normal': {'write_count': 1, 'like_count': 1, 'retwitt_count': 0}}}}
 
-test_nest = [testdic_key, testdic_value for testdic_key, testdic_value in test_dic.items()]
+# test_nest = [testdic_key, testdic_value for testdic_key, testdic_value in test_dic.items()]
 
-for testdic_key, testdic_value in test_dic.items():
-    print(testdic_key, testdic_value)
+# for testdic_key, testdic_value in test_dic.items():
+#     print(testdic_key, testdic_value)
+
+keywordsimple = '에피민트'
+keyword = f'{keywordsimple} OR #{keywordsimple}'
+
+print(keyword)
