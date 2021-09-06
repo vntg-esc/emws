@@ -188,8 +188,8 @@ def main(keyword):
     # logger.info('-------------')
     # logger.info(list(twitt_days_info.items()))
 
-    # 자료 저장(스프레드시트) 및 메일 발송(gmail)
-    save_data_on_spreadsheet(twitt_days_info)
+    # # 자료 저장(스프레드시트) 및 메일 발송(gmail)
+    # save_data_on_spreadsheet(twitt_days_info)
 
 def save_data_on_spreadsheet(twitt_days_info):
     """구글스프레드시트 저장"""
@@ -289,6 +289,10 @@ def save_data_on_spreadsheet(twitt_days_info):
 
 if __name__ == '__main__':
 
+    # 현재일시
+    now_time = datetime.now()
+
+    # 로그
     logger = logging.getLogger("mainLog")
     logger.setLevel(logging.INFO)
     loggerHandler = logging.StreamHandler()
@@ -303,7 +307,7 @@ if __name__ == '__main__':
     streamHandler.setFormatter(formatter)
     # logger.addHandler(streamHandler)
 
-    logfile_path = f'{constant.C_ROOT_PATH}\log'
+    logfile_path = '{}\log\{}.log'.format(constant.C_ROOT_PATH, datetime.strftime(now_time, '%y%m%d%H%M%S'))
 
     fileHandler = logging.FileHandler(logfile_path, encoding='utf8')
     fileHandler.setLevel(logging.DEBUG)
@@ -314,6 +318,7 @@ if __name__ == '__main__':
     logger.info("start : Search twitter")
     logger.info('----------------------------------------------------------------------------------------------------')
 
+    # Main
     try:
         # 기본 검색어 - 해시태그 포함
         keywordsimple = '에피민트'
@@ -332,9 +337,6 @@ if __name__ == '__main__':
             sys.argv.append(full_keyword)
         else:
             full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
-
-        # 현재일시
-        now_time = datetime.now()
 
         # main 호출
         main(full_keyword)
