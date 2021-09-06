@@ -178,3 +178,16 @@ def resource_path(relative_path):
 
 print(resource_path('aaa.py'))
 print(resource_path('history\{}.json'))
+
+import logging
+
+# logger
+logger = logging.getLogger("log")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+
+formatter = logging.Formatter('%(asctime)sl%(levelname)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+logger.info("server start")

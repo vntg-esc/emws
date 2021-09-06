@@ -17,8 +17,8 @@ def send_email(email_to):
     email_subject = '[EMWS] 프로세스 수행 결과 공유'
 
     # email_content = 'Sending an emaiil test'
-    email_content_file = open(common.resource_path('html\RESULT_MAIL_TEMPLATE.html'), 'r', encoding='utf8')
-    # email_content_file = open("C:\GitHub\VNTG-N-ERP\emws\html\RESULT_MAIL_TEMPLATE.html", 'r', encoding='utf8')
+    email_content_file = open("C:\GitHub\VNTG-N-ERP\emws\html\RESULT_MAIL_TEMPLATE.html", 'r', encoding='utf8')
+    # email_content_file = open(common.resource_path('html\RESULT_MAIL_TEMPLATE.html'), 'r', encoding='utf8')
     email_content = email_content_file.read()
 
     # html 내용 수정
