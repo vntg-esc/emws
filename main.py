@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime, timedelta
 import json
+import logging
 
 # python-twitter
 import twitter
@@ -44,8 +45,8 @@ class twittPostInfo():
         return 'repr : {} - {}'.format(self._id_str, self._details)
 
     def detail_info(self):
-        print('Current ID : {}'.format(id(self)))
-        print('Twitt Detail Info : {} {}'.format(self._id_str, self._details.get('favorite_count')))
+        logger.info('Current ID : {}'.format(id(self)))
+        logger.info('Twitt Detail Info : {} {}'.format(self._id_str, self._details.get('favorite_count')))
 
     def get_favorite_count(self):
         return self._details.get('favorite_count')
@@ -100,7 +101,7 @@ def get_search_twitt_by_keyword(twitter_api, keyword):
 
     # 검색결과 파일 저장
     # outfile = open(common.resource_path('history\{}.json').format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
-    outfile = open("C:\GitHub\VNTG-N-ERP\emws\history\{}.json".format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
+    outfile = open(f"{constant.C_ROOT_PATH}\history\{datetime.strftime(now_time, '%y%m%d%H%M%S')}.json", 'w')
     json.dump(statuses, outfile)
 
     # 리스트 변환
@@ -170,26 +171,25 @@ def main(keyword):
             # 일자별, 시간별, 사용자별 자료 생성
             create_twitt_info(create_at, status, user_type, twitt_days_info, twitt_hours_info, twitt_user_info, date_exists=False, hour_exists=False)
 
-        # # print(status)
-        # print('-----------')
-        # print('id_str : ' + status.id_str)
-        # print('name : ' + status.user.name)
-        # print('screen_name : ' + status.user.screen_name)
-        # print('hashtags : ' + str(status.hashtags))
-        # print('favorite_count : ' + str(status.favorite_count))
-        # print('retweet_count : ' + str(status.retweet_count))
-        # print('create_at : ' + str(create_at))
-        # # print(status.text.encode('utf-8'))
-        # print('text : ' + status.text)
+        # # logger.info(status)
+        logger.info('create_at : ' + str(create_at))
+        logger.info('id_str : ' + status.id_str)
+        logger.info('name : ' + status.user.name)
+        logger.info('screen_name : ' + status.user.screen_name)
+        logger.info('text : ' + status.text)
+        # logger.info('hashtags : ' + str(status.hashtags))
+        logger.info('favorite_count : ' + str(status.favorite_count))
+        logger.info('retweet_count : ' + str(status.retweet_count))
+        # logger.info(status.text.encode('utf-8'))
+        logger.info('--------------------------------------------------')
 
-    print('')
-    print(f"검색어 '{keyword}'로 검색된 건수 : {len(statuses)}건")
-    print(twitt_days_info)
-    # print('-------------')
-    # print(list(twitt_days_info.items()))
+    logger.info(f"검색어 '{keyword}'로 검색된 건수 : {len(statuses)}건")
+    logger.info(twitt_days_info)
+    # logger.info('-------------')
+    # logger.info(list(twitt_days_info.items()))
 
-    # 자료 저장(스프레드시트) 및 메일 발송(gmail)
-    save_data_on_spreadsheet(twitt_days_info)
+    # # 자료 저장(스프레드시트) 및 메일 발송(gmail)
+    # save_data_on_spreadsheet(twitt_days_info)
 
 def save_data_on_spreadsheet(twitt_days_info):
     """구글스프레드시트 저장"""
@@ -199,7 +199,7 @@ def save_data_on_spreadsheet(twitt_days_info):
     ]
 
     # json_file_name = common.resource_path('gspread.json')
-    json_file_name = 'C:\GitHub\VNTG-N-ERP\emws\gspread.json'
+    json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
     gc = gspread.authorize(credentials)
@@ -229,9 +229,9 @@ def save_data_on_spreadsheet(twitt_days_info):
     
     # 스프레드시트 작성
     for post_date, hour_data in sorted(twitt_days_info.items()):
-        # print(post_date, hour_data)
+        # logger.info(post_date, hour_data)
         for post_hour, campaign_data in sorted(hour_data.items()):
-            # print(post_date, post_hour, campaign_data)
+            # logger.info(post_date, post_hour, campaign_data)
             for campaign, post_data in campaign_data.items():
 
                 # 추가 작성 필요 여부
@@ -242,7 +242,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                     # 스프레드시트의 일자/시간과 수집한 일자/시간과 일치하는지 확인
                     if worksheet_data['게시일자'] == str(post_date) and worksheet_data['시간(24시)'] == int(post_hour):
                         ##### 업데이트 필요
-                        # print('존재')
+                        # logger.info('존재')
                         appendYN = False
 
                         # 스프레드시트 행 수 ( +2 : 인덱스 0부터 시작 / 타이틀 )
@@ -255,7 +255,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         for i in range(0, 7):
                             if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) == 
                                 datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d')):
-                                # print('게시일자 + {}일이 수집일자와 동일'.format(i+1))
+                                # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
                                 colName = chr(ord(colName) + i)
 
                                 # 스프레드시트 작성
@@ -265,7 +265,7 @@ def save_data_on_spreadsheet(twitt_days_info):
 
                 if appendYN == True:
                     ##### 신규 건 스프레드시트 작성
-                    print('신규')
+                    logger.info('신규')
                     # 작성
                     worksheet.append_row([
                                         #   datetime.strftime(now_time, '%Y-%m-%d %H:%M:%S')
@@ -280,37 +280,70 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , "추가"
                                         ])
 
-    print('스프레드시트 작성 종료')
+    logger.info('스프레드시트 작성 종료')
 
     # 메일 발송
     send_email_result = send_email.send_email(constant.C_ADMIN_MAIL_ADDRESS)
 
-    print(f'메일 발송 결과 : {send_email_result}')
+    logger.info(f'메일 발송 결과 : {send_email_result}')
 
 if __name__ == '__main__':
 
-    # 기본 검색어 - 해시태그 포함
-    keywordsimple = '에피민트'
-    keyword = f'({keywordsimple} OR #{keywordsimple})'
+    logger = logging.getLogger("mainLog")
+    logger.setLevel(logging.INFO)
+    loggerHandler = logging.StreamHandler()
 
-    # 확장 검색어 - 리트윗 제외
-    extword = 'AND exclude:retweets'
-    # extword = 'AND exclude:retweets AND filter:quote'
+    formatter = logging.Formatter('%(asctime)s|%(name)s|%(levelname)s:%(message)s')
+    loggerHandler.setFormatter(formatter)
+    logger.addHandler(loggerHandler)
 
-    # Full 검색키워드
-    full_keyword = f'{keyword} {extword}'
+    # Create Handeler == 로깅한 정보가 출력되는 위치 설정
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logging.DEBUG)
+    streamHandler.setFormatter(formatter)
+    # logger.addHandler(streamHandler)
 
-    # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
-    # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
-    if len(sys.argv) == 1:
-        sys.argv.append(full_keyword)
-    else:
-        full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
+    logfile_path = f'{constant.C_ROOT_PATH}\log'
 
-    # 현재일시
-    now_time = datetime.now()
+    fileHandler = logging.FileHandler(logfile_path, encoding='utf8')
+    fileHandler.setLevel(logging.DEBUG)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
 
-    # main 호출
-    main(full_keyword)
-    # main_test1(keyword)
-    # main_test2(keyword)
+    logger.info('----------------------------------------------------------------------------------------------------')
+    logger.info("start : Search twitter")
+    logger.info('----------------------------------------------------------------------------------------------------')
+
+    try:
+        # 기본 검색어 - 해시태그 포함
+        keywordsimple = '에피민트'
+        keyword = f'({keywordsimple} OR #{keywordsimple})'
+
+        # 확장 검색어 - 리트윗 제외
+        extword = 'AND exclude:retweets'
+        # extword = 'AND exclude:retweets AND filter:quote'
+
+        # Full 검색키워드
+        full_keyword = f'{keyword} {extword}'
+
+        # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
+        # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
+        if len(sys.argv) == 1:
+            sys.argv.append(full_keyword)
+        else:
+            full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
+
+        # 현재일시
+        now_time = datetime.now()
+
+        # main 호출
+        main(full_keyword)
+        # main_test1(keyword)
+        # main_test2(keyword)
+
+    except Exception as inst:
+        logger.error("error" + str(inst))
+
+    logger.info('----------------------------------------------------------------------------------------------------')
+    logger.info("end : Search twitter")
+    logger.info('----------------------------------------------------------------------------------------------------')

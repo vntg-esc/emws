@@ -1,7 +1,10 @@
 C_FILTER_KEYWORD = [
     'TTA',
-    'epimint'
+    'epimint',
+    'EPIMINT',
 ]
+
+C_ROOT_PATH = 'C:\GitHub\VNTG-N-ERP\emws'
 
 C_ADMIN_MAIL_ADDRESS = 'hyunhee.lee@vntgcorp.com'
 
