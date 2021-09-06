@@ -91,6 +91,8 @@ secrets.py
 gspread.json
 
 # TEST 스크립트
-/test/
+test/
 # 실행 결과 json 파일
-/history/
+history/
+# 실행 결과 log 파일
+log/
