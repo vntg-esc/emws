@@ -22,7 +22,9 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 
 
 ## 상세내용
-- 검색어 : (에피민트 OR #에피민트) AND exclude:retweets’
+- 검색어
+    - 기본 : '(에피민트 OR #에피민트) AND exclude:retweets’
+    - 또는 실행 파라미터에 검색어 사용 가능
 - 수집내용
     - 일자별, 시간별, 유저별(일반 사용자 글 - normal, 광고성 글 구분 - ads)
     - 게시물 수, 좋아요 수, 리트윗 수 집계
@@ -32,6 +34,7 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
         - 시트명 : 년월 ( 예 : 202109 )
         - https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0
 
+- 수행주기 : 1시간
+
 - 수집결과 메일 발송 
     - 관리자 계정 : hyunhee.lee@vntgcorp.com
-    
