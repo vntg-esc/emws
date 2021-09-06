@@ -38,3 +38,7 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 
 - 수집결과 메일 발송 
     - 관리자 계정 : hyunhee.lee@vntgcorp.com
+
+- 실행시로그 / 이력
+    - log : ./log/년월일시분초.log 생성
+    - history : ./history/년월일시분초.json 생성
