@@ -2,6 +2,7 @@ from send_email import send_email
 import sys, os
 from datetime import datetime, timedelta
 import constant
+import common
 
 # filter_string = "TTA AAAAAA"
 
@@ -192,4 +193,7 @@ import constant
 logfile_path = "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002')
 print(logfile_path)
 print(os.path.basename(logfile_path))
-send_email('hyunhee.lee@vntgcorp.com', "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002'))
+# send_email('hyunhee.lee@vntgcorp.com', "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002'))
+
+
+print(common.resource_path(''))

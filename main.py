@@ -100,8 +100,8 @@ def get_search_twitt_by_keyword(twitter_api, keyword):
     statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True)
 
     # 검색결과 파일 저장
-    # outfile = open(common.resource_path('history\{}.json').format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
-    outfile = open(f"{constant.C_ROOT_PATH}\history\{datetime.strftime(now_time, '%y%m%d%H%M%S')}.json", 'w')
+    outfile = open(common.resource_path('history\{}.json').format(datetime.strftime(now_time, '%y%m%d%H%M%S')), 'w')
+    # outfile = open(f"{constant.C_ROOT_PATH}\history\{datetime.strftime(now_time, '%y%m%d%H%M%S')}.json", 'w')
     json.dump(statuses, outfile)
 
     # 리스트 변환
@@ -198,8 +198,8 @@ def save_data_on_spreadsheet(twitt_days_info):
     'https://www.googleapis.com/auth/drive',
     ]
 
-    # json_file_name = common.resource_path('gspread.json')
-    json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
+    json_file_name = common.resource_path('gspread.json')
+    # json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
     gc = gspread.authorize(credentials)
@@ -307,7 +307,8 @@ if __name__ == '__main__':
     streamHandler.setFormatter(formatter)
     # logger.addHandler(streamHandler)
 
-    logfile_path = '{}\log\{}.log'.format(constant.C_ROOT_PATH, datetime.strftime(now_time, '%y%m%d%H%M%S'))
+    logfile_path = '{}\log\{}.log'.format(common.resource_path(''), datetime.strftime(now_time, '%y%m%d%H%M%S'))
+    # logfile_path = '{}\log\{}.log'.format(constant.C_ROOT_PATH, datetime.strftime(now_time, '%y%m%d%H%M%S'))
 
     fileHandler = logging.FileHandler(logfile_path, encoding='utf8')
     fileHandler.setLevel(logging.DEBUG)
