@@ -188,8 +188,8 @@ def main(keyword):
     # logger.info('-------------')
     # logger.info(list(twitt_days_info.items()))
 
-    # # 자료 저장(스프레드시트) 및 메일 발송(gmail)
-    # save_data_on_spreadsheet(twitt_days_info)
+    # 자료 저장(스프레드시트) 및 메일 발송(gmail)
+    save_data_on_spreadsheet(twitt_days_info)
 
 def save_data_on_spreadsheet(twitt_days_info):
     """구글스프레드시트 저장"""
