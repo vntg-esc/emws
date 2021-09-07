@@ -211,8 +211,7 @@ def save_data_on_spreadsheet(twitt_days_info):
     doc = gc.open_by_url(spreadsheet_url)
 
     # 스프레드시트 문서명
-    # worksheetName = datetime.strftime(now_time, '%Y%m')
-    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}_시간대별누적'
+    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
 
     # 시트 선택하기
     worksheet = doc.worksheet(worksheetName)
@@ -242,7 +241,6 @@ def save_data_on_spreadsheet(twitt_days_info):
                     # 스프레드시트의 일자/시간과 수집한 일자/시간과 일치하는지 확인
                     if worksheet_data['게시일자'] == str(post_date) and worksheet_data['시간(24시)'] == int(post_hour):
                         ##### 업데이트 필요
-                        # logger.info('존재')
                         appendYN = False
 
                         # 스프레드시트 행 수 ( +2 : 인덱스 0부터 시작 / 타이틀 )
@@ -287,7 +285,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , list(post_data.values())[1]
                                         , list(post_data.values())[2]
                                         , "", "", "", "", "", "", ""
-                                        , "추가"
+                                        , ""
                                         ])
 
     logger.info('스프레드시트 작성 종료')
@@ -336,23 +334,19 @@ if __name__ == '__main__':
         keyword = f'({keywordsimple} OR #{keywordsimple})'
 
         # 확장 검색어 - 리트윗 제외
-        extword = 'AND exclude:retweets'
-        # extword = 'AND exclude:retweets AND filter:quote'
+        keyword_ext = 'AND exclude:retweets'
 
         # Full 검색키워드
-        full_keyword = f'{keyword} {extword}'
+        full_keyword = f'{keyword} {keyword_ext}'
 
         # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
-        # sys.argv.append(full_keyword) if len(sys.argv) == 1 else full_keyword = '{} {}'.format(sys.argv[1], extword)
         if len(sys.argv) == 1:
             sys.argv.append(full_keyword)
         else:
-            full_keyword = f'({sys.argv[1]} OR #{sys.argv[1]}) {extword}'
+            full_keyword = '({} OR #{}) {}'.format(sys.argv[1], sys.argv[1], keyword_ext)
 
         # main 호출
         main(full_keyword)
-        # main_test1(keyword)
-        # main_test2(keyword)
 
     except Exception as inst:
         logger.error("error" + str(inst))
