@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 import constant
 import common
 
+# 구글 스프레드시트
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 # filter_string = "TTA AAAAAA"
 
 # # 필터 문자열이 포함되는지 확인
@@ -52,7 +56,7 @@ import common
 
 
 # now = datetime.now().strftime('%Y')
-# now_time = datetime.today()
+now_time = datetime.today()
 
 # print(now)
 # print(now_time)
@@ -197,3 +201,56 @@ print(os.path.basename(logfile_path))
 
 
 print(common.resource_path(''))
+
+
+import itertools
+
+monthly_income = [1161, 1814, 1270, 2256, 1413, 1842, 2221, 2207, 2450, 2823, 2540, 2134]
+result = list(itertools.accumulate(monthly_income))
+
+print(result)
+
+
+# """구글스프레드시트 저장"""
+# scope = [
+# 'https://spreadsheets.google.com/feeds',
+# 'https://www.googleapis.com/auth/drive',
+# ]
+
+# json_file_name = common.resource_path('gspread.json')
+# # json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
+
+# credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
+# gc = gspread.authorize(credentials)
+
+
+# spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
+
+# # 스프레스시트 문서 가져오기 
+# doc = gc.open_by_url(spreadsheet_url)
+
+# # 스프레드시트 문서명
+# # worksheetName = datetime.strftime(now_time, '%Y%m')
+# worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}_시간대별누적'
+
+# # 시트 선택하기
+# worksheet = doc.worksheet(worksheetName)
+
+# # 시트 자료 가져오기
+# worksheet_datas = worksheet.get_all_records()
+
+# # print(type(worksheet_datas))
+# # print(len(worksheet_datas))
+# # print(worksheet_datas[len(worksheet_datas) - 1])
+
+# row_data = worksheet_datas[len(worksheet_datas) - 1]
+
+# print(type(row_data['게시물 누적수(D)']))
+# print(row_data['좋아요 누적수(D)'])
+# print(row_data['리트윗 누적수(D)'])
+
+
+if '2021-09-01' < '2021-08-31':
+    print('true')
+else:
+    print('false')

@@ -98,3 +98,5 @@ history/
 log/
 # aws private kep - pem
 aws_emws_key.pem
+# 웹 브라우저 드라이버
+webdriver/
