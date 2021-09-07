@@ -80,7 +80,7 @@ def create_twitt_info(create_at, status, user_type, twitt_days_info, twitt_hours
             # 좋아요수
             'like_count': status.favorite_count,
             # 리트윗수
-            'retwitt_count': status.retweet_count
+            'retwitt_count': status.retweet_count,
     }
     # 계정유형별 자료 추가
     twitt_user_info[user_type] = twitt_detail_info
@@ -176,10 +176,10 @@ def main(keyword):
         logger.info('id_str : ' + status.id_str)
         logger.info('name : ' + status.user.name)
         logger.info('screen_name : ' + status.user.screen_name)
-        logger.info('text : ' + status.text)
-        # logger.info('hashtags : ' + str(status.hashtags))
         logger.info('favorite_count : ' + str(status.favorite_count))
         logger.info('retweet_count : ' + str(status.retweet_count))
+        logger.info('text : ' + status.text)
+        # logger.info('hashtags : ' + str(status.hashtags))
         # logger.info(status.text.encode('utf-8'))
         logger.info('--------------------------------------------------')
 
@@ -212,7 +212,7 @@ def save_data_on_spreadsheet(twitt_days_info):
 
     # 스프레드시트 문서명
     # worksheetName = datetime.strftime(now_time, '%Y%m')
-    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
+    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}_시간대별누적'
 
     # 시트 선택하기
     worksheet = doc.worksheet(worksheetName)
@@ -249,7 +249,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         rowCnt = worksheet_datas.index(worksheet_data) + 2
 
                         # 스프레드시트 열
-                        colName = "H"
+                        colName = "K"
 
                         # 게시일자 + n일이 수집일자와 같은지 확인
                         for i in range(0, 7):
@@ -265,14 +265,24 @@ def save_data_on_spreadsheet(twitt_days_info):
 
                 if appendYN == True:
                     ##### 신규 건 스프레드시트 작성
-                    logger.info('신규')
                     # 작성
+                    worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
+
+                    # 트윗수 누적
+                    write_count_cumul = worksheet_data_last['게시물 누적수(D)']
+                    # 좋아요수 누적
+                    like_count_cumul = worksheet_data_last['좋아요 누적수(D)']
+                    # 리트윗수 누적
+                    retwitt_count_cumul = worksheet_data_last['리트윗 누적수(D)']
+
                     worksheet.append_row([
-                                        #   datetime.strftime(now_time, '%Y-%m-%d %H:%M:%S')
                                         datetime.strftime(now_time, '%Y-%m-%d %H')
                                         , str(post_date)
                                         , str(post_hour)
                                         , str(campaign)
+                                        , write_count_cumul + list(post_data.values())[0]
+                                        , like_count_cumul + list(post_data.values())[1]
+                                        , retwitt_count_cumul + list(post_data.values())[2]
                                         , list(post_data.values())[0]
                                         , list(post_data.values())[1]
                                         , list(post_data.values())[2]
