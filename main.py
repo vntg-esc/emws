@@ -211,7 +211,7 @@ def save_data_on_spreadsheet(twitt_days_info):
     doc = gc.open_by_url(spreadsheet_url)
 
     # 스프레드시트 문서명
-    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
+    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
 
     # 시트 선택하기
     worksheet = doc.worksheet(worksheetName)
@@ -225,6 +225,16 @@ def save_data_on_spreadsheet(twitt_days_info):
         worksheet = doc.add_worksheet(title=worksheetName, rows='1000', cols='22')
         # 타이틀 추가
         worksheet.append_row(constant.C_SPREADSHEET_TITLE)
+
+    # 신규 행 추가 필요 여부
+    new_row_yn = True;
+    # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
+    write_count_cumul = 0
+    like_count_cumul = 0
+    retwitt_count_cumul = 0
+
+    # 스프레드 마지막 시트 자료
+    worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
     
     # 스프레드시트 작성
     for post_date, hour_data in sorted(twitt_days_info.items()):
@@ -236,15 +246,69 @@ def save_data_on_spreadsheet(twitt_days_info):
                 # 추가 작성 필요 여부
                 appendYN = True
 
+                # 이전일자 - 기본 값
+                prev_post_date = '1111-01-01'
+                # 일자 개수
+                day_count = 0
+                # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
+                # write_count_cumul = 0
+                # like_count_cumul = 0
+                # retwitt_count_cumul = 0
+
                 # 스프레드시트 내용 확인
                 for worksheet_data in worksheet_datas:
-                    # 스프레드시트의 일자/시간과 수집한 일자/시간과 일치하는지 확인
-                    if worksheet_data['게시일자'] == str(post_date) and worksheet_data['시간(24시)'] == int(post_hour):
-                        ##### 업데이트 필요
-                        appendYN = False
 
-                        # 스프레드시트 행 수 ( +2 : 인덱스 0부터 시작 / 타이틀 )
-                        rowCnt = worksheet_datas.index(worksheet_data) + 2
+                    day_count = day_count + 1 if prev_post_date == worksheet_data['게시일자'] else 0
+                    prev_post_date = worksheet_data['게시일자']
+                    # 스프레드시트 행 수 ( +2 : 인덱스 0부터 시작 / 타이틀 )
+                    rowCnt = worksheet_datas.index(worksheet_data) + 2
+
+                    # 스프레드시트의 일자/시간과 수집한 일자/시간과 일치하는지 확인
+                    if (worksheet_data['게시일자'] == str(post_date) and
+                        worksheet_data['시간(24시)'] == int(post_hour) and
+                        worksheet_data['채널'] == campaign):
+                        ##### 업데이트 필요
+
+                        # 같은 일자 누적 자료 갱신
+                        if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
+                            == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d')):
+                            if day_count == 0:
+                                # print("0 - worksheet_data['시간(24시)']" + str(worksheet_data['시간(24시)']))
+                                # 일자의 첫번째 시간 : 시점과 동일
+                                write_count_cumul = list(post_data.values())[0]
+                                like_count_cumul = list(post_data.values())[1]
+                                retwitt_count_cumul = list(post_data.values())[2]
+                            else:
+                                # print("else - worksheet_data['시간(24시)']" + str(worksheet_data['시간(24시)']))
+                                # 일자의 두번째 이상 시간 : 누적
+                                write_count_cumul += list(post_data.values())[0]
+                                like_count_cumul += list(post_data.values())[1]
+                                retwitt_count_cumul += list(post_data.values())[2]
+
+                        # 같은 일자 누적 자료 갱신
+                        # if day_count == 0:
+                        #     # 일자의 첫번째 시간 : 시점과 동일
+                        #     write_count_cumul = list(post_data.values())[0]
+                        #     like_count_cumul = list(post_data.values())[1]
+                        #     retwitt_count_cumul = list(post_data.values())[2]
+                        # else:
+                        #     # 일자의 두번째 이상 시간 : 누적
+                        #     write_count_cumul += list(post_data.values())[0]
+                        #     like_count_cumul += list(post_data.values())[1]
+                        #     retwitt_count_cumul += list(post_data.values())[2]
+
+                        # cell_list = worksheet.range('H{}:J{}'.format(rowCnt, rowCnt))
+
+                        # cell_values = [write_count_cumul, like_count_cumul, retwitt_count_cumul]
+
+                        # for i, val in enumerate(cell_values):
+                        #     cell_list[i].value = val
+
+                        # # 업데이트 셀
+                        # worksheet.update_cells(cell_list)
+
+                        # 신규 추가 여부
+                        appendYN = False
 
                         # 스프레드시트 열
                         colName = "K"
@@ -256,37 +320,66 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
                                 colName = chr(ord(colName) + i)
 
-                                # 스프레드시트 작성
+                                # 스프레드시트 작성 - 좋아요수 + 리트윗수
+                                # print(f'{colName}{rowCnt}', list(post_data.values())[1] + list(post_data.values())[2])
                                 worksheet.update_acell(f'{colName}{rowCnt}', list(post_data.values())[1] + list(post_data.values())[2])
 
                                 pass
 
                 if appendYN == True:
                     ##### 신규 건 스프레드시트 작성
-                    # 작성
-                    worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
+
+                    # 신규 행 추가 필요 여부
+                    new_row_yn = False;
 
                     # 트윗수 누적
-                    write_count_cumul = worksheet_data_last['게시물 누적수(D)']
+                    write_count_cumul += worksheet_data_last['게시물 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
                     # 좋아요수 누적
-                    like_count_cumul = worksheet_data_last['좋아요 누적수(D)']
+                    like_count_cumul += worksheet_data_last['좋아요 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
                     # 리트윗수 누적
-                    retwitt_count_cumul = worksheet_data_last['리트윗 누적수(D)']
+                    retwitt_count_cumul += worksheet_data_last['리트윗 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
 
+                    # print('신규 건 존재')
                     worksheet.append_row([
-                                        datetime.strftime(now_time, '%Y-%m-%d %H')
+                                          datetime.strftime(now_time, '%Y-%m-%d %H')
                                         , str(post_date)
                                         , str(post_hour)
                                         , str(campaign)
-                                        , write_count_cumul + list(post_data.values())[0]
-                                        , like_count_cumul + list(post_data.values())[1]
-                                        , retwitt_count_cumul + list(post_data.values())[2]
                                         , list(post_data.values())[0]
                                         , list(post_data.values())[1]
                                         , list(post_data.values())[2]
+                                        , write_count_cumul + list(post_data.values())[0]
+                                        , like_count_cumul + list(post_data.values())[1]
+                                        , retwitt_count_cumul + list(post_data.values())[2]
                                         , "", "", "", "", "", "", ""
                                         , ""
                                         ])
+
+    if new_row_yn:
+        # print('last_write_count_cumul : ' + str(write_count_cumul))
+        # print('last_like_count_cumul : ' + str(like_count_cumul))
+        # print('last_retwitt_count_cumul : ' + str(retwitt_count_cumul))
+        if (worksheet_data_last['게시물 누적수(D)'] == write_count_cumul and 
+            worksheet_data_last['좋아요 누적수(D)'] == like_count_cumul and 
+            worksheet_data_last['리트윗 누적수(D)'] == retwitt_count_cumul):
+            # print("same")
+            pass
+        else:
+            # print("diff")
+            worksheet.append_row([
+                                  datetime.strftime(now_time, '%Y-%m-%d %H')
+                                , datetime.strftime(now_time, '%Y-%m-%d %H')
+                                , datetime.strftime(now_time, '%H')
+                                , 'normal'
+                                , 0
+                                , 0
+                                , 0
+                                , write_count_cumul
+                                , like_count_cumul
+                                , retwitt_count_cumul
+                                , "", "", "", "", "", "", ""
+                                , ""
+                                ])
 
     logger.info('스프레드시트 작성 종료')
 
