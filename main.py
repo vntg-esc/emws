@@ -290,9 +290,9 @@ def save_data_on_spreadsheet(twitt_days_info):
                         if worksheet_datas.index(worksheet_data) + 1 == len(worksheet_datas):
                             # print(worksheet_data['게시일자'], ' ', worksheet_data['시간(24시)'])
                             # 여러셀 업데이트
-                            cell_list = worksheet.range('E{}:G{}'.format(rowCnt, rowCnt))
+                            cell_list = worksheet.range('E{}:J{}'.format(rowCnt, rowCnt))
 
-                            cell_values = [list(post_data.values())[0], list(post_data.values())[1], list(post_data.values())[2]]
+                            cell_values = [list(post_data.values())[0], list(post_data.values())[1], list(post_data.values())[2], write_count_cumul, like_count_cumul, retwitt_count_cumul]
 
                             for i, val in enumerate(cell_values):
                                 cell_list[i].value = val

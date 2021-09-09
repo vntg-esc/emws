@@ -194,65 +194,72 @@ now_time = datetime.today()
 # print(logfile_path)
 
 
-logfile_path = "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002')
-print(logfile_path)
-print(os.path.basename(logfile_path))
-# send_email('hyunhee.lee@vntgcorp.com', "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002'))
+# logfile_path = "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002')
+# print(logfile_path)
+# print(os.path.basename(logfile_path))
+# # send_email('hyunhee.lee@vntgcorp.com', "C:\GitHub\VNTG-N-ERP\emws\log\{}.log".format('210906170002'))
 
 
-print(common.resource_path(''))
+# print(common.resource_path(''))
 
 
-import itertools
+# import itertools
 
-monthly_income = [1161, 1814, 1270, 2256, 1413, 1842, 2221, 2207, 2450, 2823, 2540, 2134]
-result = list(itertools.accumulate(monthly_income))
+# monthly_income = [1161, 1814, 1270, 2256, 1413, 1842, 2221, 2207, 2450, 2823, 2540, 2134]
+# result = list(itertools.accumulate(monthly_income))
 
-print(result)
-
-
-"""구글스프레드시트 저장"""
-scope = [
-'https://spreadsheets.google.com/feeds',
-'https://www.googleapis.com/auth/drive',
-]
-
-json_file_name = common.resource_path('gspread.json')
-# json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
-
-credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
-gc = gspread.authorize(credentials)
+# print(result)
 
 
-spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
+# """구글스프레드시트 저장"""
+# scope = [
+# 'https://spreadsheets.google.com/feeds',
+# 'https://www.googleapis.com/auth/drive',
+# ]
 
-# 스프레스시트 문서 가져오기 
-doc = gc.open_by_url(spreadsheet_url)
+# json_file_name = common.resource_path('gspread.json')
+# # json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
 
-# 스프레드시트 문서명
-# worksheetName = datetime.strftime(now_time, '%Y%m')
-worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
+# credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
+# gc = gspread.authorize(credentials)
 
-# 시트 선택하기
-worksheet = doc.worksheet(worksheetName)
 
-# 시트 자료 가져오기
-worksheet_datas = worksheet.get_all_records()
+# spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
 
-# cell_list = worksheet.range('S1:U1')
+# # 스프레스시트 문서 가져오기 
+# doc = gc.open_by_url(spreadsheet_url)
 
-# cell_values = [1, 2, 3]
+# # 스프레드시트 문서명
+# # worksheetName = datetime.strftime(now_time, '%Y%m')
+# worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
 
-# for i, val in enumerate(cell_values):
-#     cell_list[i].value = val
+# # 시트 선택하기
+# worksheet = doc.worksheet(worksheetName)
 
-# worksheet.update_cells(cell_list)
+# # 시트 자료 가져오기
+# worksheet_datas = worksheet.get_all_records()
 
-print(worksheet_datas)
-# filter_list = [element for element in constant.C_FILTER_KEYWORD if(element in status.user.name)]
+# # cell_list = worksheet.range('S1:U1')
 
-exsistsyn = [worksheet_data['게시일자'] for worksheet_data in worksheet_datas]
+# # cell_values = [1, 2, 3]
 
-print(exsistsyn)
+# # for i, val in enumerate(cell_values):
+# #     cell_list[i].value = val
 
-['2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15']
+# # worksheet.update_cells(cell_list)
+
+# print(worksheet_datas)
+# # filter_list = [element for element in constant.C_FILTER_KEYWORD if(element in status.user.name)]
+
+# exsistsyn = [worksheet_data['게시일자'] for worksheet_data in worksheet_datas]
+
+# print(exsistsyn)
+
+
+# ['2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15']
+
+test_list = ['1', '2', '3']
+
+test_list.insert(0, 4)
+
+print(test_list)
