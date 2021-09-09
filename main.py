@@ -240,7 +240,11 @@ def save_data_on_spreadsheet(twitt_days_info):
     # 스프레드 마지막 시트 자료
     worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
 
-    last_row_list = [worksheet_data for worksheet_data in worksheet_datas if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
+    # 전일 정보
+    last_row_list = [worksheet_data for worksheet_data in worksheet_datas 
+                if (datetime.strftime(datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
+
+    # 전일 마지막 행
     last_row = last_row_list[len(last_row_list) - 1]
     
     # 스프레드시트 작성
@@ -257,10 +261,6 @@ def save_data_on_spreadsheet(twitt_days_info):
                 prev_post_date = '1111-01-01'
                 # 일자 개수
                 day_count = 0
-                # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
-                # write_count_cumul = 0
-                # like_count_cumul = 0
-                # retwitt_count_cumul = 0
 
                 # 스프레드시트 내용 확인
                 for worksheet_data in worksheet_datas:
@@ -278,7 +278,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         # 같은 일자 누적 자료 갱신
                         # if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
                         if (datetime.strptime(post_date, '%Y-%m-%d')
-                            == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1)):
+                            == datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') + timedelta(days=-1)):
                             # print(datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d'))
                             # print(datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1))
                             # 하루 전 합계
@@ -287,8 +287,8 @@ def save_data_on_spreadsheet(twitt_days_info):
                             retwitt_count_cumul_prev += list(post_data.values())[2]
 
                         # 같은 일자 누적 자료 갱신
-                        if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
-                            == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d')):
+                        if datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') == datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d'):
+                            # == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d')):
                             if day_count == 0:
                                 # print("0 - worksheet_data['시간(24시)']" + str(worksheet_data['시간(24시)']))
                                 # 일자의 첫번째 시간 : 시점과 동일
@@ -342,7 +342,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         # 게시일자 + n일이 수집일자와 같은지 확인
                         for i in range(0, 7):
                             if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) == 
-                                datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d')):
+                                datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') ):
                                 # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
                                 colName = chr(ord(colName) + i)
 
