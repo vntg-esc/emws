@@ -236,14 +236,23 @@ worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
 # 시트 선택하기
 worksheet = doc.worksheet(worksheetName)
 
-# # 시트 자료 가져오기
-# worksheet_datas = worksheet.get_all_records()
+# 시트 자료 가져오기
+worksheet_datas = worksheet.get_all_records()
 
-cell_list = worksheet.range('S1:U1')
+# cell_list = worksheet.range('S1:U1')
 
-cell_values = [1, 2, 3]
+# cell_values = [1, 2, 3]
 
-for i, val in enumerate(cell_values):
-    cell_list[i].value = val
+# for i, val in enumerate(cell_values):
+#     cell_list[i].value = val
 
-worksheet.update_cells(cell_list)
+# worksheet.update_cells(cell_list)
+
+print(worksheet_datas)
+# filter_list = [element for element in constant.C_FILTER_KEYWORD if(element in status.user.name)]
+
+exsistsyn = [worksheet_data['게시일자'] for worksheet_data in worksheet_datas]
+
+print(exsistsyn)
+
+['2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15', '2021-09-02 15']
