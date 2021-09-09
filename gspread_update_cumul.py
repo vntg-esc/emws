@@ -45,59 +45,74 @@ write_count_cumul = 0
 like_count_cumul = 0
 retwitt_count_cumul = 0
 
+# filter_list = [element for element in constant.C_FILTER_KEYWORD if(element in status.user.name)]
+worksheet_list = [worksheet_data for worksheet_data in worksheet_datas if ('2021-09-06' in worksheet_data['게시일자'])]
+print(len(worksheet_list))
+print(worksheet_list[len(worksheet_list) - 1])
+worksheet_list_row = worksheet_list[len(worksheet_list) - 1]
+
+print(type(worksheet_list_row['수집일시'])) 
+print(type('{} {}'.format(worksheet_list_row['게시일자'], worksheet_list_row['시간(24시)'])))
+print(worksheet_list_row['게시물 누적수(D)'])
+print(worksheet_list_row['좋아요 누적수(D)'])
+print(worksheet_list_row['리트윗 누적수(D)'])
+
+# for worksheet_data in worksheet_datas:
+#     print(worksheet_data)
+
 # worksheet.update('H25:J25', (10, 20, 30))
 
-for worksheet_data in worksheet_datas:
+# for worksheet_data in worksheet_datas:
 
-    # if worksheet_data['게시일자'] >= '2021-09-01':
+#     # if worksheet_data['게시일자'] >= '2021-09-01':
 
-    day_count = day_count + 1 if prev_post_date == worksheet_data['게시일자'] else 0    
-    prev_post_date = worksheet_data['게시일자']
-    curr_hour = worksheet_data['시간(24시)']
-    rowCnt = worksheet_datas.index(worksheet_data) + 2
-
-
-    if day_count == 0:
-        # 일자의 첫번째 시간 : 시점과 동일
-        write_count_cumul = worksheet_data['게시물 수']
-        like_count_cumul = worksheet_data['좋아요 수']
-        retwitt_count_cumul = worksheet_data['리트윗 수']
-    else:
-        # 일자의 두번째 이상 시간 : 누적
-        write_count_cumul += worksheet_data['게시물 수']
-        like_count_cumul += worksheet_data['좋아요 수']
-        retwitt_count_cumul += worksheet_data['리트윗 수']
-
-    print(f'일자개수 {str(day_count)}, 이전일자 : {prev_post_date} 시간 : {curr_hour} | {write_count_cumul} {like_count_cumul} {retwitt_count_cumul}')
-
-    # 여러셀 업데이트
-    cell_list = worksheet.range('H{}:J{}'.format(rowCnt, rowCnt))
-
-    cell_values = [write_count_cumul, like_count_cumul, retwitt_count_cumul]
-
-    for i, val in enumerate(cell_values):
-        cell_list[i].value = val
-
-    worksheet.update_cells(cell_list)
-
-    # # 한 셀씩 업데이트
-    # worksheet.update_acell(f'H{rowCnt}', write_count_cumul)
-    # worksheet.update_acell(f'I{rowCnt}', like_count_cumul)
-    # worksheet.update_acell(f'J{rowCnt}', retwitt_count_cumul)
+#     day_count = day_count + 1 if prev_post_date == worksheet_data['게시일자'] else 0    
+#     prev_post_date = worksheet_data['게시일자']
+#     curr_hour = worksheet_data['시간(24시)']
+#     rowCnt = worksheet_datas.index(worksheet_data) + 2
 
 
+#     if day_count == 0:
+#         # 일자의 첫번째 시간 : 시점과 동일
+#         write_count_cumul = worksheet_data['게시물 수']
+#         like_count_cumul = worksheet_data['좋아요 수']
+#         retwitt_count_cumul = worksheet_data['리트윗 수']
+#     else:
+#         # 일자의 두번째 이상 시간 : 누적
+#         write_count_cumul += worksheet_data['게시물 수']
+#         like_count_cumul += worksheet_data['좋아요 수']
+#         retwitt_count_cumul += worksheet_data['리트윗 수']
 
-    # print(worksheet_data['게시일자'])
-    # print(worksheet_data['시간(24시)'])
+#     print(f'일자개수 {str(day_count)}, 이전일자 : {prev_post_date} 시간 : {curr_hour} | {write_count_cumul} {like_count_cumul} {retwitt_count_cumul}')
 
-    # print(worksheet_data['게시물 수'])
-    # print(worksheet_data['좋아요 수'])
-    # print(worksheet_data['리트윗 수'])
+#     # 여러셀 업데이트
+#     cell_list = worksheet.range('H{}:J{}'.format(rowCnt, rowCnt))
 
-    # print(worksheet_data['게시물 누적수(D)'])
-    # print('게시물 누적수(D) 공백에 더하기')
-    # print(worksheet_data['게시물 누적수(D)'] + 1)
-    # print(worksheet_data['좋아요 누적수(D)'])
-    # print(worksheet_data['리트윗 누적수(D)'])
+#     cell_values = [write_count_cumul, like_count_cumul, retwitt_count_cumul]
+
+#     for i, val in enumerate(cell_values):
+#         cell_list[i].value = val
+
+#     worksheet.update_cells(cell_list)
+
+#     # # 한 셀씩 업데이트
+#     # worksheet.update_acell(f'H{rowCnt}', write_count_cumul)
+#     # worksheet.update_acell(f'I{rowCnt}', like_count_cumul)
+#     # worksheet.update_acell(f'J{rowCnt}', retwitt_count_cumul)
+
+
+
+#     # print(worksheet_data['게시일자'])
+#     # print(worksheet_data['시간(24시)'])
+
+#     # print(worksheet_data['게시물 수'])
+#     # print(worksheet_data['좋아요 수'])
+#     # print(worksheet_data['리트윗 수'])
+
+#     # print(worksheet_data['게시물 누적수(D)'])
+#     # print('게시물 누적수(D) 공백에 더하기')
+#     # print(worksheet_data['게시물 누적수(D)'] + 1)
+#     # print(worksheet_data['좋아요 누적수(D)'])
+#     # print(worksheet_data['리트윗 누적수(D)'])
 
 

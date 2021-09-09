@@ -233,9 +233,15 @@ def save_data_on_spreadsheet(twitt_days_info):
     write_count_cumul = 0
     like_count_cumul = 0
     retwitt_count_cumul = 0
+    write_count_cumul_prev = 0
+    like_count_cumul_prev = 0
+    retwitt_count_cumul_prev = 0
 
     # 스프레드 마지막 시트 자료
     worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
+
+    last_row_list = [worksheet_data for worksheet_data in worksheet_datas if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
+    last_row = last_row_list[len(last_row_list) - 1]
     
     # 스프레드시트 작성
     for post_date, hour_data in sorted(twitt_days_info.items()):
@@ -269,6 +275,16 @@ def save_data_on_spreadsheet(twitt_days_info):
                         worksheet_data['시간(24시)'] == int(post_hour) and
                         worksheet_data['채널'] == campaign):
                         ##### 업데이트 필요
+                        # 같은 일자 누적 자료 갱신
+                        # if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
+                        if (datetime.strptime(post_date, '%Y-%m-%d')
+                            == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1)):
+                            # print(datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d'))
+                            # print(datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1))
+                            # 하루 전 합계
+                            write_count_cumul_prev += list(post_data.values())[0]
+                            like_count_cumul_prev += list(post_data.values())[1]
+                            retwitt_count_cumul_prev += list(post_data.values())[2]
 
                         # 같은 일자 누적 자료 갱신
                         if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
@@ -287,8 +303,14 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 retwitt_count_cumul += list(post_data.values())[2]
 
                         # 마지막 열이 신규 게시물로 인해 추가된 행이 아닌 경우 업데이트
-                        if worksheet_datas.index(worksheet_data) + 1 == len(worksheet_datas):
+                        if (worksheet_datas.index(worksheet_data) + 1 == len(worksheet_datas) and
+                            worksheet_data['수집일시'] == '{} {}'.format(worksheet_data['게시일자'], worksheet_data['시간(24시)'])):
                             # print(worksheet_data['게시일자'], ' ', worksheet_data['시간(24시)'])
+                            # 수집일시 업데이트
+                            worksheet.update_acell(f'A{rowCnt}', datetime.strftime(now_time, '%Y-%m-%d %H'))                
+                            # 신규행 추가 불필요
+                            new_row_yn = False
+
                             # 여러셀 업데이트
                             cell_list = worksheet.range('E{}:J{}'.format(rowCnt, rowCnt))
 
@@ -298,6 +320,18 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 cell_list[i].value = val
 
                             worksheet.update_cells(cell_list)
+
+                            # last_row_list = [worksheet_data for worksheet_data in worksheet_datas if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
+                            # last_row = last_row_list[len(last_row_list) - 1]
+
+                            # print(like_count_cumul_prev, last_row['좋아요 누적수(D)'], like_count_cumul, like_count_cumul_prev - last_row['좋아요 누적수(D)'] - like_count_cumul)
+                            # print(retwitt_count_cumul_prev, last_row['리트윗 누적수(D)'], retwitt_count_cumul, retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'] - retwitt_count_cumul)
+                            # worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'] - like_count_cumul)
+                            # worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'] - retwitt_count_cumul)
+                            # print(like_count_cumul_prev, last_row['좋아요 누적수(D)'], like_count_cumul, like_count_cumul_prev - last_row['좋아요 누적수(D)'])
+                            # print(retwitt_count_cumul_prev, last_row['리트윗 누적수(D)'], retwitt_count_cumul, retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
+                            worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
+                            worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
 
                         # 신규 추가 여부
                         appendYN = False
@@ -346,6 +380,8 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , "", "", "", "", "", "", ""
                                         , ""
                                         ])
+                    worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
+                    worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
 
     if new_row_yn:
         # print('last_write_count_cumul : ' + str(write_count_cumul))
@@ -372,6 +408,8 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , "", "", "", "", "", "", ""
                                 , ""
                                 ])
+            worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
+            worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
 
     logger.info('스프레드시트 작성 종료')
 
@@ -416,19 +454,22 @@ if __name__ == '__main__':
     try:
         # 기본 검색어 - 해시태그 포함
         keywordsimple = '에피민트'
-        keyword = f'({keywordsimple} OR #{keywordsimple})'
+        keyword = f'{keywordsimple} OR #{keywordsimple}'
 
         # 확장 검색어 - 리트윗 제외
         keyword_ext = 'AND exclude:retweets'
+        # keyword_ext = 'AND exclude:retweets AND filter:quote'
 
         # Full 검색키워드
         full_keyword = f'{keyword} {keyword_ext}'
+
+        print(full_keyword)
 
         # 파라미터가 있는지 확인 - 없으면 기본 : '에피민트'
         if len(sys.argv) == 1:
             sys.argv.append(full_keyword)
         else:
-            full_keyword = '({} OR #{}) {}'.format(sys.argv[1], sys.argv[1], keyword_ext)
+            full_keyword = '{} OR #{} {}'.format(sys.argv[1], sys.argv[1], keyword_ext)
 
         # main 호출
         main(full_keyword)
