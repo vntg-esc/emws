@@ -286,27 +286,18 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 like_count_cumul += list(post_data.values())[1]
                                 retwitt_count_cumul += list(post_data.values())[2]
 
-                        # 같은 일자 누적 자료 갱신
-                        # if day_count == 0:
-                        #     # 일자의 첫번째 시간 : 시점과 동일
-                        #     write_count_cumul = list(post_data.values())[0]
-                        #     like_count_cumul = list(post_data.values())[1]
-                        #     retwitt_count_cumul = list(post_data.values())[2]
-                        # else:
-                        #     # 일자의 두번째 이상 시간 : 누적
-                        #     write_count_cumul += list(post_data.values())[0]
-                        #     like_count_cumul += list(post_data.values())[1]
-                        #     retwitt_count_cumul += list(post_data.values())[2]
+                        # 마지막 열이 신규 게시물로 인해 추가된 행이 아닌 경우 업데이트
+                        if worksheet_datas.index(worksheet_data) + 1 == len(worksheet_datas):
+                            # print(worksheet_data['게시일자'], ' ', worksheet_data['시간(24시)'])
+                            # 여러셀 업데이트
+                            cell_list = worksheet.range('E{}:G{}'.format(rowCnt, rowCnt))
 
-                        # cell_list = worksheet.range('H{}:J{}'.format(rowCnt, rowCnt))
+                            cell_values = [list(post_data.values())[0], list(post_data.values())[1], list(post_data.values())[2]]
 
-                        # cell_values = [write_count_cumul, like_count_cumul, retwitt_count_cumul]
+                            for i, val in enumerate(cell_values):
+                                cell_list[i].value = val
 
-                        # for i, val in enumerate(cell_values):
-                        #     cell_list[i].value = val
-
-                        # # 업데이트 셀
-                        # worksheet.update_cells(cell_list)
+                            worksheet.update_cells(cell_list)
 
                         # 신규 추가 여부
                         appendYN = False
@@ -329,7 +320,7 @@ def save_data_on_spreadsheet(twitt_days_info):
 
                 if appendYN == True:
                     ##### 신규 건 스프레드시트 작성
-
+                    # print('appendYN == True')
                     # 신규 행 추가 필요 여부
                     new_row_yn = False;
 
