@@ -379,9 +379,9 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , retwitt_count_cumul + list(post_data.values())[2]
                                         , "", "", "", "", "", "", ""
                                         , ""
+                                        , like_count_cumul_prev - last_row['좋아요 누적수(D)']
+                                        , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
                                         ])
-                    worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
-                    worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
 
     if new_row_yn:
         # print('last_write_count_cumul : ' + str(write_count_cumul))
@@ -407,9 +407,9 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , retwitt_count_cumul
                                 , "", "", "", "", "", "", ""
                                 , ""
+                                , like_count_cumul_prev - last_row['좋아요 누적수(D)']
+                                , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
                                 ])
-            worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
-            worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
 
     logger.info('스프레드시트 작성 종료')
 
