@@ -339,7 +339,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                     # like_count_cumul += worksheet_data_last['좋아요 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
                     # # 리트윗수 누적
                     # retwitt_count_cumul += worksheet_data_last['리트윗 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
-1
+
                     # print('신규 건 존재')
                     worksheet.append_row([
                                           datetime.strftime(now_time, '%Y-%m-%d %H')
