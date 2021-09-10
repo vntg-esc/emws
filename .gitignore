@@ -100,3 +100,7 @@ log/
 aws_emws_key.pem
 # 웹 브라우저 드라이버
 webdriver/
+# SQlite
+db_sqlite.py
+dump.sql
+test.db
