@@ -211,33 +211,37 @@ now_time = datetime.today()
 # print(result)
 
 
-# """구글스프레드시트 저장"""
-# scope = [
-# 'https://spreadsheets.google.com/feeds',
-# 'https://www.googleapis.com/auth/drive',
-# ]
+"""구글스프레드시트 저장"""
+scope = [
+'https://spreadsheets.google.com/feeds',
+'https://www.googleapis.com/auth/drive',
+]
 
-# json_file_name = common.resource_path('gspread.json')
-# # json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
+json_file_name = common.resource_path('gspread.json')
+# json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
 
-# credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
-# gc = gspread.authorize(credentials)
+credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
+gc = gspread.authorize(credentials)
 
 
-# spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
+spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
 
-# # 스프레스시트 문서 가져오기 
-# doc = gc.open_by_url(spreadsheet_url)
+# 스프레스시트 문서 가져오기 
+doc = gc.open_by_url(spreadsheet_url)
 
-# # 스프레드시트 문서명
-# # worksheetName = datetime.strftime(now_time, '%Y%m')
-# worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
+# 스프레드시트 문서명
+# worksheetName = datetime.strftime(now_time, '%Y%m')
+worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
 
-# # 시트 선택하기
-# worksheet = doc.worksheet(worksheetName)
+# 시트 선택하기
+worksheet = doc.worksheet(worksheetName)
 
-# # 시트 자료 가져오기
-# worksheet_datas = worksheet.get_all_records()
+# 시트 자료 가져오기
+worksheet_datas = worksheet.get_all_records()
+
+for worksheet_data in worksheet_datas:
+    print(worksheet_data['수집일시'] )
+    print('{} {}'.format(worksheet_data['게시일자'], str(worksheet_data['시간(24시)']).zfill(2)))
 
 # # cell_list = worksheet.range('S1:U1')
 
