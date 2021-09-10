@@ -384,9 +384,11 @@ def save_data_on_spreadsheet(twitt_days_info):
         # print('last_write_count_cumul : ' + str(write_count_cumul))
         # print('last_like_count_cumul : ' + str(like_count_cumul))
         # print('last_retwitt_count_cumul : ' + str(retwitt_count_cumul))
-        if (worksheet_data_last['게시물 누적수(D)'] == write_count_cumul and 
-            worksheet_data_last['좋아요 누적수(D)'] == like_count_cumul and 
-            worksheet_data_last['리트윗 누적수(D)'] == retwitt_count_cumul):
+        if (worksheet_data_last['게시물 누적수(D)'] == write_count_cumul and
+            worksheet_data_last['좋아요 누적수(D)'] == like_count_cumul and
+            worksheet_data_last['리트윗 누적수(D)'] == retwitt_count_cumul and
+            worksheet_data_last['좋아요 발생'] == like_count_cumul_prev - last_row['좋아요 누적수(D)'] and
+            worksheet_data_last['리트윗 발생'] == retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']):
             # print("same")
             pass
         else:
