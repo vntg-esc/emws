@@ -313,32 +313,28 @@ def save_data_on_spreadsheet(twitt_days_info):
                             new_row_yn = False
 
                             # 여러셀 업데이트
-                            cell_list = worksheet.range('E{}:J{}'.format(rowCnt, rowCnt))
+                            cell_list = worksheet.range('E{}:L{}'.format(rowCnt, rowCnt))
 
-                            cell_values = [list(post_data.values())[0], list(post_data.values())[1], list(post_data.values())[2], write_count_cumul, like_count_cumul, retwitt_count_cumul]
+                            cell_values = [list(post_data.values())[0],
+                                           list(post_data.values())[1], 
+                                           list(post_data.values())[2], 
+                                           write_count_cumul, 
+                                           like_count_cumul, 
+                                           retwitt_count_cumul,
+                                           like_count_cumul_prev - last_row['좋아요 누적수(D)'],
+                                           retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
+                                           ]
 
                             for i, val in enumerate(cell_values):
                                 cell_list[i].value = val
 
                             worksheet.update_cells(cell_list)
 
-                            # last_row_list = [worksheet_data for worksheet_data in worksheet_datas if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
-                            # last_row = last_row_list[len(last_row_list) - 1]
-
-                            # print(like_count_cumul_prev, last_row['좋아요 누적수(D)'], like_count_cumul, like_count_cumul_prev - last_row['좋아요 누적수(D)'] - like_count_cumul)
-                            # print(retwitt_count_cumul_prev, last_row['리트윗 누적수(D)'], retwitt_count_cumul, retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'] - retwitt_count_cumul)
-                            # worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'] - like_count_cumul)
-                            # worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'] - retwitt_count_cumul)
-                            # print(like_count_cumul_prev, last_row['좋아요 누적수(D)'], like_count_cumul, like_count_cumul_prev - last_row['좋아요 누적수(D)'])
-                            # print(retwitt_count_cumul_prev, last_row['리트윗 누적수(D)'], retwitt_count_cumul, retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
-                            worksheet.update_acell(f'S{rowCnt}', like_count_cumul_prev - last_row['좋아요 누적수(D)'])
-                            worksheet.update_acell(f'T{rowCnt}', retwitt_count_cumul_prev - last_row['리트윗 누적수(D)'])
-
                         # 신규 추가 여부
                         appendYN = False
 
                         # 스프레드시트 열
-                        colName = "K"
+                        colName = "M"
 
                         # 게시일자 + n일이 수집일자와 같은지 확인
                         for i in range(0, 7):
@@ -378,10 +374,10 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , write_count_cumul + list(post_data.values())[0]
                                         , like_count_cumul + list(post_data.values())[1]
                                         , retwitt_count_cumul + list(post_data.values())[2]
-                                        , "", "", "", "", "", "", ""
-                                        , "신규 게시글"
                                         , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                         , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
+                                        , "", "", "", "", "", "", ""
+                                        , "신규 게시글"
                                         ])
 
     if new_row_yn:
@@ -406,10 +402,10 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , write_count_cumul
                                 , like_count_cumul
                                 , retwitt_count_cumul
-                                , "", "", "", "", "", "", ""
-                                , "신규 좋아요 또는 리트윗"
                                 , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                 , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
+                                , "", "", "", "", "", "", ""
+                                , "신규 좋아요 또는 리트윗"
                                 ])
 
     logger.info('스프레드시트 작성 종료')
