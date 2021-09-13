@@ -227,7 +227,7 @@ def save_data_on_spreadsheet(twitt_days_info):
         # 타이틀 추가
         worksheet.append_row(constant.C_SPREADSHEET_TITLE)
 
-     # 신규 행 추가 필요 여부
+    # 신규 행 추가 필요 여부
     new_row_yn = True;
     # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
     write_count_cumul = 0
@@ -339,7 +339,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         # 게시일자 + n일이 수집일자와 같은지 확인
                         for i in range(0, 7):
                             if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) == 
-                                datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') ):
+                                datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') ):
                                 # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
                                 colName = chr(ord(colName) + i)
 
