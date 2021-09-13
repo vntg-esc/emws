@@ -227,7 +227,7 @@ def save_data_on_spreadsheet(twitt_days_info):
         # 타이틀 추가
         worksheet.append_row(constant.C_SPREADSHEET_TITLE)
 
-    # 신규 행 추가 필요 여부
+     # 신규 행 추가 필요 여부
     new_row_yn = True;
     # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
     write_count_cumul = 0
@@ -242,7 +242,7 @@ def save_data_on_spreadsheet(twitt_days_info):
 
     # 전일 정보
     last_row_list = [worksheet_data for worksheet_data in worksheet_datas 
-                if (datetime.strftime(datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
+                if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
 
     # 전일 마지막 행
     last_row = last_row_list[len(last_row_list) - 1]
@@ -278,7 +278,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         # 같은 일자 누적 자료 갱신
                         # if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d')
                         if (datetime.strptime(post_date, '%Y-%m-%d')
-                            == datetime.strptime(worksheet_data_last['게시일자'], '%Y-%m-%d') + timedelta(days=-1)):
+                            == datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1)):
                             # print(datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d'))
                             # print(datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') + timedelta(days=-1))
                             # 하루 전 합계
@@ -371,9 +371,9 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , list(post_data.values())[0]
                                         , list(post_data.values())[1]
                                         , list(post_data.values())[2]
-                                        , write_count_cumul + list(post_data.values())[0]
-                                        , like_count_cumul + list(post_data.values())[1]
-                                        , retwitt_count_cumul + list(post_data.values())[2]
+                                        , (write_count_cumul if str(post_date) == worksheet_data_last['게시일자'] else 0) + list(post_data.values())[0]
+                                        , (like_count_cumul  if str(post_date) == worksheet_data_last['게시일자'] else 0) + list(post_data.values())[1]
+                                        , (retwitt_count_cumul if str(post_date) == worksheet_data_last['게시일자'] else 0) + list(post_data.values())[2]
                                         , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                         , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
                                         , "", "", "", "", "", "", ""
@@ -401,9 +401,9 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , 0
                                 , 0
                                 , 0
-                                , write_count_cumul
-                                , like_count_cumul
-                                , retwitt_count_cumul
+                                , write_count_cumul if datetime.strftime(now_time, '%Y-%m-%d') == worksheet_data_last['게시일자'] else 0
+                                , like_count_cumul if datetime.strftime(now_time, '%Y-%m-%d') == worksheet_data_last['게시일자'] else 0
+                                , retwitt_count_cumul if datetime.strftime(now_time, '%Y-%m-%d') == worksheet_data_last['게시일자'] else 0
                                 , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                 , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
                                 , "", "", "", "", "", "", ""
