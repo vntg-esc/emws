@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from datetime import datetime, timedelta
 import json
 import logging
@@ -104,7 +104,7 @@ def get_search_twitt_by_keyword(twitter_api, keyword):
     statuses = twitter_api.GetSearch(term=keyword, count=100, result_type="recent", return_json=True)
 
     # 검색결과 파일 저장
-    file_full_path = common.resource_path('history\{}.json').format(file_name)
+    file_full_path = common.resource_path('history{}{}.json').format(os.path.sep, file_name)
     outfile = open(file_full_path, 'w')
     # outfile = open(f"{constant.C_ROOT_PATH}\history\{datetime.strftime(now_time, '%y%m%d%H%M%S')}.json", 'w')
     json.dump(statuses, outfile)
@@ -218,8 +218,8 @@ def main(keyword):
     # logger.info('-------------')
     # logger.info(list(twitt_days_info.items()))
 
-    # # 자료 저장(스프레드시트) 및 메일 발송(gmail)
-    # save_data_on_spreadsheet(twitt_days_info)
+    # 자료 저장(스프레드시트) 및 메일 발송(gmail)
+    save_data_on_spreadsheet(twitt_days_info)
 
 def save_data_on_spreadsheet(twitt_days_info):
     """구글스프레드시트 저장"""
@@ -468,7 +468,7 @@ if __name__ == '__main__':
     streamHandler.setFormatter(formatter)
     # logger.addHandler(streamHandler)
 
-    logfile_path = '{}\log\{}.log'.format(common.resource_path(''), datetime.strftime(now_time, '%y%m%d%H%M%S'))
+    logfile_path = '{}{}log{}{}.log'.format(common.resource_path(''), os.path.sep, os.path.sep, datetime.strftime(now_time, '%y%m%d%H%M%S'))
     # logfile_path = '{}\log\{}.log'.format(constant.C_ROOT_PATH, datetime.strftime(now_time, '%y%m%d%H%M%S'))
 
     fileHandler = logging.FileHandler(logfile_path, encoding='utf8')
@@ -482,7 +482,7 @@ if __name__ == '__main__':
 
     ### db연결, 커서 획득
     # DB 생성 (오토 커밋)
-    conn = sqlite3.connect("emws.db", isolation_level=None)
+    conn = sqlite3.connect(common.resource_path('db{}emws.db').format(os.path.sep), isolation_level=None)
 
     # 커서 획득
     db = conn.cursor()

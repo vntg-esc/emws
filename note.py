@@ -298,3 +298,5 @@ print('210914040001.py'.replace('.py', ''))
 now_time = datetime.now()
 file_name = datetime.strftime(now_time, '%y%m%d%H%M%S')
 print(file_name)
+
+print(common.resource_path('history{}{}.json').format(os.path.sep, file_name))

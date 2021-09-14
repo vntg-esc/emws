@@ -24,6 +24,7 @@ import traceback
 ### db연결, 커서 획득
 # DB 생성 (오토 커밋)
 conn = sqlite3.connect("emws_test.db", isolation_level=None)
+# conn = sqlite3.connect(common.resource_path('db{}emws.db').format(os.path.sep), isolation_level=None)
 
 # 커서 획득
 db = conn.cursor()
