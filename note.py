@@ -278,7 +278,23 @@ now_time = datetime.today()
 
 # 2021 09M 13D 15H 37m 47s
 
-if '2021-09-13' == datetime.strftime(now_time, '%Y-%m-%d'):
-    print('11', datetime.strftime(now_time, '%Y-%m-%d'))
-else:
-    print(datetime.strftime(now_time, '%Y-%m-%d'))
+
+print('210914040001'[0:2])
+print('210914040001.py'.replace('.py', ''))
+
+# path = "./test/history"
+# file_list = os.listdir(path)
+
+# for file_name in file_list:
+#     if file_name[8:10] == '00':
+#         print('정각', file_name)
+    # else:
+    #     print('아님', file_name)
+
+# print([file_name for file_name in file_list if file_name[8:10] == '00'])
+# print ("file_list: {}".format(file_list))
+
+# 현재일시
+now_time = datetime.now()
+file_name = datetime.strftime(now_time, '%y%m%d%H%M%S')
+print(file_name)

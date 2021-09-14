@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/GitHub/VNTG-N-ERP/emws/emws_test.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1944"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">SELECT *
+  FROM SNS_TWITTER_MASTER A JOIN SNS_TWITTER_DETAIL B ON B.ID = A.ID
+ WHERE A.ID = '1435570769560367112'
+</sql><sql name="SQL 2">WITH C_DATA AS (
+	SELECT A.CAMPAIGN
+		 , A.COLLECT_AT
+		 , STRFTIME('%Y-%m-%d', DATETIME(A.COLLECT_AT)) AS COLLECT_DATE
+		 , STRFTIME('%Y-%m-%d %H', DATETIME(A.COLLECT_AT)) AS COLLECT_HOUR
+		 , A.ID
+		 , A.CREATE_AT
+		 , STRFTIME('%Y-%m-%d', DATETIME(A.CREATE_AT)) AS CREATE_DATE
+		 , STRFTIME('%Y-%m-%d %H', DATETIME(A.CREATE_AT)) AS CREATE_HOUR
+		 , A.USER_NAME
+		 , A.USER_SCREEN_NAME
+		 , A.TEXT
+		 , A.FAVORITE_COUNT
+		 , A.RETWEET_COUNT
+		 , A.HASHTAGS
+		 , A.SEARCH_QUERY
+		 , A.REMARK
+	  FROM SNS_EPIMINT A
+)
+SELECT *
+  FROM C_DATA
+ WHERE CREATE_DATE = '2021-09-03'
+
+  
+-- SELECT COLLECT_DATE, SUM(FAVORITE_COUNT) AS FAV_CNT, SUM(RETWEET_COUNT) AS RET_CNT
+--   FROM C_DATA
+-- GROUP BY COLLECT_DATE
+</sql><current_tab id="1"/></tab_sql></sqlb_project>
