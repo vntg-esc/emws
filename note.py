@@ -8,6 +8,23 @@ import common
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+### 파이썬 SQlite 라이브러리 블러오기 및 버전 확인
+import sqlite3
+
+# print(sqlite3.version)
+# print(sqlite3.sqlite_version)
+
+### db연결, 커서 획득
+# DB 생성 (오토 커밋)
+conn = sqlite3.connect(common.resource_path('db{}emws.db').format(os.path.sep), isolation_level=None)
+
+# 커서 획득
+c = conn.cursor()
+
+query = open('emws_day.sql', 'r', encoding='UTF-8').read()
+c.execute(query)
+print(c.fetchall())
+
 # filter_string = "TTA AAAAAA"
 
 # # 필터 문자열이 포함되는지 확인
@@ -279,24 +296,24 @@ now_time = datetime.today()
 # 2021 09M 13D 15H 37m 47s
 
 
-print('210914040001'[0:2])
-print('210914040001.py'.replace('.py', ''))
+# print('210914040001'[0:2])
+# print('210914040001.py'.replace('.py', ''))
 
-# path = "./test/history"
-# file_list = os.listdir(path)
+# # path = "./test/history"
+# # file_list = os.listdir(path)
 
-# for file_name in file_list:
-#     if file_name[8:10] == '00':
-#         print('정각', file_name)
-    # else:
-    #     print('아님', file_name)
+# # for file_name in file_list:
+# #     if file_name[8:10] == '00':
+# #         print('정각', file_name)
+#     # else:
+#     #     print('아님', file_name)
 
-# print([file_name for file_name in file_list if file_name[8:10] == '00'])
-# print ("file_list: {}".format(file_list))
+# # print([file_name for file_name in file_list if file_name[8:10] == '00'])
+# # print ("file_list: {}".format(file_list))
 
-# 현재일시
-now_time = datetime.now()
-file_name = datetime.strftime(now_time, '%y%m%d%H%M%S')
-print(file_name)
+# # 현재일시
+# now_time = datetime.now()
+# file_name = datetime.strftime(now_time, '%y%m%d%H%M%S')
+# print(file_name)
 
-print(common.resource_path('history{}{}.json').format(os.path.sep, file_name))
+# print(common.resource_path('history{}{}.json').format(os.path.sep, file_name))
