@@ -228,37 +228,38 @@ def save_data_on_spreadsheet(twitt_days_info):
     'https://www.googleapis.com/auth/drive',
     ]
 
-    json_file_name = common.resource_path('gspread.json')
-    # json_file_name = f'{constant.C_ROOT_PATH}\gspread.json'
+    json_file_path = common.resource_path(constant.C_GOOGLE_API_KEY_FILENAME)
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_name, scope)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file_path, scope)
     gc = gspread.authorize(credentials)
 
-
-    spreadsheet_url = 'https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0'
-
     # 스프레스시트 문서 가져오기 
-    doc = gc.open_by_url(spreadsheet_url)
+    doc = gc.open_by_url(constant.C_SPREADSHEET_URL)
 
     # 스프레드시트 문서명
     # worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
     worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
+    worksheetName_daily = f'{now_time.year}{str(now_time.month).zfill(2)}_일자별'
 
     # 시트 선택하기
     worksheet = doc.worksheet(worksheetName)
-
-    # 시트 자료 가져오기
-    worksheet_datas = worksheet.get_all_records()
+    worksheet_daily = doc.worksheet(worksheetName_daily)
 
     # 1일이면 시트 생성
     if now_time.day == 1:
         # 시트 생성
         worksheet = doc.add_worksheet(title=worksheetName, rows='1000', cols='22')
+        worksheet_daily = doc.add_worksheet(title=worksheetName_daily, rows='1000', cols='22')
         # 타이틀 추가
-        worksheet.append_row(constant.C_SPREADSHEET_TITLE)
+        worksheet.append_row(constant.C_SPREADSHEET_TITLE1)
+        worksheet_daily.append_row(constant.C_SPREADSHEET_TITLE2)
+
+    # 시트 자료 가져오기
+    worksheet_datas = worksheet.get_all_records()
+    worksheet_datas_daily = worksheet_daily.get_all_records()
 
     # 신규 행 추가 필요 여부
-    new_row_yn = True;
+    new_row_yn = True
     # 트윗수 누적, 좋아요수 누적, 리트윗수 누적
     write_count_cumul = 0
     like_count_cumul = 0
@@ -271,12 +272,12 @@ def save_data_on_spreadsheet(twitt_days_info):
     worksheet_data_last = worksheet_datas[len(worksheet_datas) - 1]
 
     # 전일 정보
-    last_row_list = [worksheet_data for worksheet_data in worksheet_datas 
+    last_row_list = [worksheet_data for worksheet_data in worksheet_datas
                 if (datetime.strftime(now_time + timedelta(days=-1), '%Y-%m-%d') in worksheet_data['게시일자'])]
 
     # 전일 마지막 행
     last_row = last_row_list[len(last_row_list) - 1]
-    
+
     # 스프레드시트 작성
     for post_date, hour_data in sorted(twitt_days_info.items()):
         # logger.info(post_date, hour_data)
@@ -338,7 +339,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                             worksheet_data['수집일시'] == '{} {}'.format(worksheet_data['게시일자'], str(worksheet_data['시간(24시)']).zfill(2))):
                             # print(worksheet_data['게시일자'], ' ', worksheet_data['시간(24시)'])
                             # 수집일시 업데이트
-                            worksheet.update_acell(f'A{rowCnt}', datetime.strftime(now_time, '%Y-%m-%d %H'))                
+                            worksheet.update_acell(f'A{rowCnt}', datetime.strftime(now_time, '%Y-%m-%d %H'))
                             # 신규행 추가 불필요
                             new_row_yn = False
 
@@ -346,10 +347,10 @@ def save_data_on_spreadsheet(twitt_days_info):
                             cell_list = worksheet.range('E{}:L{}'.format(rowCnt, rowCnt))
 
                             cell_values = [list(post_data.values())[0],
-                                           list(post_data.values())[1], 
-                                           list(post_data.values())[2], 
-                                           write_count_cumul, 
-                                           like_count_cumul, 
+                                           list(post_data.values())[1],
+                                           list(post_data.values())[2],
+                                           write_count_cumul,
+                                           like_count_cumul,
                                            retwitt_count_cumul,
                                            like_count_cumul_prev - last_row['좋아요 누적수(D)'],
                                            retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
@@ -368,7 +369,7 @@ def save_data_on_spreadsheet(twitt_days_info):
 
                         # 게시일자 + n일이 수집일자와 같은지 확인
                         for i in range(0, 7):
-                            if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) == 
+                            if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) ==
                                 datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') ):
                                 # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
                                 colName = chr(ord(colName) + i)
@@ -383,7 +384,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                     ##### 신규 건 스프레드시트 작성
                     # print('appendYN == True')
                     # 신규 행 추가 필요 여부
-                    new_row_yn = False;
+                    new_row_yn = False
 
                     # # 트윗수 누적
                     # write_count_cumul += worksheet_data_last['게시물 누적수(D)'] if worksheet_data_last['게시일자'] == str(post_date) else 0
@@ -439,6 +440,41 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , "", "", "", "", "", "", ""
                                 , "신규 좋아요 또는 리트윗"
                                 ])
+
+    ##### 일자별 Twitt 추이 작성
+    # db 조회
+    query = open(common.resource_path('emws_day.sql'), 'r', encoding='UTF-8').read()
+    db.execute(query)
+
+    retrieve_rows = db.fetchall()
+    # for retrieve_row in retrieve_rows:
+    #     print('db', retrieve_row)
+    #     print('retrieve_row[0]', retrieve_row[0])
+
+
+    for worksheet_data_daily in worksheet_datas_daily:
+        # print('worksheet_data_daily', worksheet_data_daily)
+        retrieve_row = [retrieve_row for retrieve_row in retrieve_rows if (retrieve_row[0] in worksheet_data_daily['수집일자'])]
+
+        if len(retrieve_row) > 0 and retrieve_row[0][0] == datetime.strftime(now_time, '%Y-%m-%d'):
+            # print('retrieve_row', retrieve_row[0][0])
+
+            # 스프레드시트 행
+            rowCnt2 = worksheet_datas_daily.index(worksheet_data_daily) + 2
+
+            # 여러셀 업데이트
+            cell_list2 = worksheet.range('B{}:D{}'.format(rowCnt2, rowCnt2))
+            
+            cell_values2 = [retrieve_row[0][2]
+                        , retrieve_row[0][3]
+                        , retrieve_row[0][4]
+                        ]
+            
+            for i, val in enumerate(cell_values2):
+                cell_list2[i].value = val
+
+            # 스프레드시트 작성
+            worksheet_daily.update_cells(cell_list2)
 
     logger.info('스프레드시트 작성 종료')
 

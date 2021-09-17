@@ -11,8 +11,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 ### 파이썬 SQlite 라이브러리 블러오기 및 버전 확인
 import sqlite3
 
-# print(sqlite3.version)
-# print(sqlite3.sqlite_version)
+print(sqlite3.version)
+print(sqlite3.sqlite_version)
 
 ### db연결, 커서 획득
 # DB 생성 (오토 커밋)
@@ -21,9 +21,15 @@ conn = sqlite3.connect(common.resource_path('db{}emws.db').format(os.path.sep), 
 # 커서 획득
 c = conn.cursor()
 
-query = open('emws_day.sql', 'r', encoding='UTF-8').read()
-c.execute(query)
-print(c.fetchall())
+query = open(common.resource_path('emws_day.sql'), 'r', encoding='UTF-8').read()
+c.execute("SELECT count(*) FROM SNS_EPIMINT A WHERE A.CAMPAIGN = 'twitter'")
+# c.execute('select count(*) from SNS_EPIMINT')
+# print(c.fetchall())
+
+retrieve_rows = c.fetchall()
+
+for retrieve_row in retrieve_rows:
+    print(retrieve_row)
 
 # filter_string = "TTA AAAAAA"
 
