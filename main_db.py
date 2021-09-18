@@ -368,7 +368,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                         colName = "M"
 
                         # 게시일자 + n일이 수집일자와 같은지 확인
-                        for i in range(0, 7):
+                        for i in range(0, 10):
                             if (datetime.strptime(worksheet_data['게시일자'], '%Y-%m-%d') + timedelta(days=i+1) ==
                                 datetime.strptime(datetime.strftime(now_time, '%Y-%m-%d'), '%Y-%m-%d') ):
                                 # logger.info('게시일자 + {}일이 수집일자와 동일'.format(i+1))
@@ -407,7 +407,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                                         , (retwitt_count_cumul if str(post_date) == worksheet_data_last['게시일자'] else 0) + list(post_data.values())[2]
                                         , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                         , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
-                                        , "", "", "", "", "", "", ""
+                                        , "", "", "", "", "", "", "", "", "", ""
                                         , "신규 게시글"
                                         ])
 
@@ -437,7 +437,7 @@ def save_data_on_spreadsheet(twitt_days_info):
                                 , retwitt_count_cumul if datetime.strftime(now_time, '%Y-%m-%d') == worksheet_data_last['게시일자'] else 0
                                 , like_count_cumul_prev - last_row['좋아요 누적수(D)']
                                 , retwitt_count_cumul_prev - last_row['리트윗 누적수(D)']
-                                , "", "", "", "", "", "", ""
+                                , "", "", "", "", "", "", "", "", "", ""
                                 , "신규 좋아요 또는 리트윗"
                                 ])
 
@@ -451,30 +451,44 @@ def save_data_on_spreadsheet(twitt_days_info):
     #     print('db', retrieve_row)
     #     print('retrieve_row[0]', retrieve_row[0])
 
+    # db에서 조회된 자료중 오늘날짜 자료
+    summary_today_db = [retrieve_row for retrieve_row in retrieve_rows if (datetime.strftime(now_time, '%Y-%m-%d') in retrieve_row[0])]
+    # print(summary_today_db)
 
-    for worksheet_data_daily in worksheet_datas_daily:
-        # print('worksheet_data_daily', worksheet_data_daily)
-        retrieve_row = [retrieve_row for retrieve_row in retrieve_rows if (retrieve_row[0] in worksheet_data_daily['수집일자'])]
+    # 구글스프레드시트 조회된 자료중 오늘날짜 자료
+    summary_today_sheet = [element for element in worksheet_datas_daily if (summary_today_db[0][0] in element['수집일자'])]
+    # print(summary_today_sheet)
 
-        if len(retrieve_row) > 0 and retrieve_row[0][0] == datetime.strftime(now_time, '%Y-%m-%d'):
-            # print('retrieve_row', retrieve_row[0][0])
+    # db에서 오늘날짜 자료가 있는지 확인
+    if len(summary_today_sheet) > 0:
+        # print('summary_today', summary_today)
 
-            # 스프레드시트 행
-            rowCnt2 = worksheet_datas_daily.index(worksheet_data_daily) + 2
+        # 스프레드시트 행
+        rowCnt2 = worksheet_datas_daily.index(summary_today_sheet[0]) + 2
 
-            # 여러셀 업데이트
-            cell_list2 = worksheet.range('B{}:D{}'.format(rowCnt2, rowCnt2))
-            
-            cell_values2 = [retrieve_row[0][2]
-                        , retrieve_row[0][3]
-                        , retrieve_row[0][4]
-                        ]
-            
-            for i, val in enumerate(cell_values2):
-                cell_list2[i].value = val
+        # 여러셀 업데이트
+        cell_list2 = worksheet.range('B{}:D{}'.format(rowCnt2, rowCnt2))
+        
+        cell_values2 = [summary_today_db[0][2]
+                    , summary_today_db[0][3]
+                    , summary_today_db[0][4]
+                    ]
+        
+        for i, val in enumerate(cell_values2):
+            cell_list2[i].value = val
 
-            # 스프레드시트 작성
-            worksheet_daily.update_cells(cell_list2)
+        # 스프레드시트 업데이트
+        # print('update_cells', cell_list2)
+        worksheet_daily.update_cells(cell_list2)
+    else:
+        # 스프레드시트 행 추가
+        # print('append_row', summary_today_db)
+        worksheet_daily.append_row([
+                                    summary_today_db[0][0]
+                                    , summary_today_db[0][2]
+                                    , summary_today_db[0][3]
+                                    , summary_today_db[0][4]
+                                    ])
 
     logger.info('스프레드시트 작성 종료')
 
