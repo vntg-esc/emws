@@ -23,7 +23,8 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 - 실행서버 : AWS EC2 Ubuntu Server 20.04 LTS (HVM), 프리티어
     - ip : 13.125.231.100
 
-- DB : SQlite3
+- DB : SQlite3 3.31.1
+- DB Browser : DB Browser for SQLite 버전 3.12.2
 
 ## 상세내용
 - 검색어
