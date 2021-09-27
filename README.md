@@ -103,3 +103,14 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
     ```bash
     (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ sudo service cron restart
     ```
+
+12. 로컬에서 서버 접속 - FTP Tool 사용 (예: Filezilla)
+    - 프로토콜 : SFTP
+    - 호스트 : 13.125.231.100
+    - 사용자 : ubuntu
+    - 키 파일 : .\aws_emws_key.pem
+
+13. 로컬에서 서버 접속 - bash ( aws_emws_key.pem 파일이 존재하는 경로에서 실행 )
+    ```bash
+    $ ssh -i aws_emws_key.pem ubuntu@13.125.231.100
+    ```
