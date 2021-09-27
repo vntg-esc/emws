@@ -20,11 +20,10 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 
 - Scripts Path : https://github.com/vntg-esc/emws
 
-- 실행서버 : AWS EC2 Ubuntu Server 18.04 LTS (HVM), 프리티어
-    - ip : 15.164.219.146
+- 실행서버 : AWS EC2 Ubuntu Server 20.04 LTS (HVM), 프리티어
+    - ip : 13.125.231.100
 
 - DB : SQlite3
-
 
 ## 상세내용
 - 검색어
@@ -38,6 +37,10 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
     - 구글 스프레드 시트 파일명 : emws_data
         - 시트명 : 년월 ( 예 : 202109 )
         - https://docs.google.com/spreadsheets/d/1Z5yePPQLSJOpPxAOHWv4mTQJXxw_vUEjIFKBcqIzqA0/edit#gid=0
+    - db 저장
+        - 시트명 : 년월_일자별 (예 : 202109_일자별)
+        - 저장폴더 : ./db/emws.db
+        - Table : SNS_EPIMINT
 
 - 수행주기 : 1시간
 
@@ -47,3 +50,56 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
 - 실행시로그 / 이력
     - log : ./log/년월일시분초.log 생성
     - history : ./history/년월일시분초.json 생성
+
+## 프로젝트 설정 - 실행방법
+0. ubuntu 20.4 os 설치
+1. 파이썬 3.9.6 설치 : https://freedeveloper.tistory.com/254
+2. (필요시) 설치 파일 삭제
+    ```bash
+    ubuntu@ip-xxx-xx-x-xxx:/opt$ rm -rf opt/Python-3.9.6
+    ubuntu@ip-xxx-xx-x-xxx:/opt$ rm -rf opt/Python-3.9.6.tgz
+    ```
+3. 폴더 생성
+    ```bash
+    ubuntu@ip-xxx-xx-x-xxx:/home$ sudo mkdir emws
+    ```
+4. 폴더 권한 부여
+    ```bash
+    ubuntu@ip-xxx-xx-x-xxx:/home$ sudo chmod -R 777 emws
+    ```
+5. 경로 이동
+    ```bash
+    ubuntu@ip-xxx-xx-x-xxx:/home$ cd emws
+    ```
+6. 가상환경 생성  / 활성화
+    ```bash
+    ubuntu@ip-xxx-xx-x-xxx:/home$ sudo python -m venv venv
+    ubuntu@ip-xxx-xx-x-xxx:/home$ . venv/bin/activate
+
+    가상환경 활성화 확인
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$
+    ```
+7. 스크립트 받기
+    - https://github.com/vntg-esc/emws.git
+8. 패키지 설치
+    ```bash
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ pip install python-twitter==3.5
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ pip install gspread==4.0.1
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ pip install oauth2client==4.1.3
+    ```
+9. 스크립트 실행 확인
+    ```bash
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ python main.py
+    ```
+10. Crontab 설정 - 한시간마다 실행
+    ```bash
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ crontab -e
+    ```
+    ```vi
+    # 매 시간(1시간) 실행
+    - 0 */1 * * * /home/emws/venv/bin/python3 /home/emws/main_db.py
+    ```
+11. Crontab 설정 변경시 재시작
+    ```bash
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ sudo service cron restart
+    ```
