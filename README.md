@@ -90,7 +90,7 @@ Python 기반의 Library 사용, Twitter Standard API를 통해 Crawling 구현
     ```
 9. 스크립트 실행 확인
     ```bash
-    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ python main.py
+    (venv) ubuntu@ip-xxx-xx-x-xxx:/home/emws$ python main_db.py
     ```
 10. Crontab 설정 - 한시간마다 실행
     ```bash
