@@ -237,22 +237,23 @@ def save_data_on_spreadsheet(twitt_days_info):
     doc = gc.open_by_url(constant.C_SPREADSHEET_URL)
 
     # 스프레드시트 문서명
-    # worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}의 사본'
-    worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
-    worksheetName_daily = f'{now_time.year}{str(now_time.month).zfill(2)}_일자별'
+    # worksheetName = f'{now_time.year}{str(now_time.month).zfill(2)}'
+    # worksheetName_daily = f'{now_time.year}{str(now_time.month).zfill(2)}_일자별'
+    worksheetName = constant.C_SPREADSHEET_SHEET_NAME_HOURLY
+    worksheetName_daily = constant.C_SPREADSHEET_SHEET_NAME_DARILY
 
     # 시트 선택하기
     worksheet = doc.worksheet(worksheetName)
     worksheet_daily = doc.worksheet(worksheetName_daily)
 
-    # 1일이면 시트 생성
-    if now_time.day == 1:
-        # 시트 생성
-        worksheet = doc.add_worksheet(title=worksheetName, rows='1000', cols='22')
-        worksheet_daily = doc.add_worksheet(title=worksheetName_daily, rows='1000', cols='22')
-        # 타이틀 추가
-        worksheet.append_row(constant.C_SPREADSHEET_TITLE1)
-        worksheet_daily.append_row(constant.C_SPREADSHEET_TITLE2)
+    # # 1일이면 시트 생성
+    # if now_time.day == 1:
+    #     # 시트 생성
+    #     worksheet = doc.add_worksheet(title=worksheetName, rows='1000', cols='22')
+    #     worksheet_daily = doc.add_worksheet(title=worksheetName_daily, rows='1000', cols='22')
+    #     # 타이틀 추가
+    #     worksheet.append_row(constant.C_SPREADSHEET_TITLE1)
+    #     worksheet_daily.append_row(constant.C_SPREADSHEET_TITLE2)
 
     # 시트 자료 가져오기
     worksheet_datas = worksheet.get_all_records()
